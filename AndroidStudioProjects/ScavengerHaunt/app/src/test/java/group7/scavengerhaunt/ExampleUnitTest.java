@@ -1,4 +1,4 @@
-package com.example.elisa.scavengerhaunt;
+package group7.scavengerhaunt;
 
 import org.junit.Test;
 

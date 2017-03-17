@@ -1,4 +1,4 @@
-package com.example.elisa.scavengerhaunt;
+package group7.scavengerhaunt;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("com.example.elisa.scavengerhaunt", appContext.getPackageName());
+        assertEquals("group7.scavengerhaunt", appContext.getPackageName());
     }
 }

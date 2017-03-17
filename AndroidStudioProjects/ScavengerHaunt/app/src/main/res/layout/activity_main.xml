@@ -1,19 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:screenOrientation="landscape"
-    tools:context="com.example.elisa.scavengerhaunt.MainActivity">
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:background="#000000"
+    tools:context="group7.scavengerhaunt.MainActivity">
 
-    <!-- replace with images, an example to go to another activity -->
-    <TextView
+    <ImageView
+        android:id="@+id/title"
+        android:background="@drawable/title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="How to Play"
-        android:textSize="40dp"
-        tools:layout_editor_absoluteY="309dp"
-        tools:layout_editor_absoluteX="85dp" />
+        android:layout_above="@+id/buttonStage"
+        android:layout_centerHorizontal="true"
+        android:scaleType="centerCrop" />
 
-</android.support.constraint.ConstraintLayout>
+    <ImageButton
+        android:id="@+id/buttonStage"
+        android:background="@drawable/select_stage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/buttonHowToPlay"
+        android:layout_centerHorizontal="true"/>
+
+    <ImageButton
+        android:id="@+id/buttonHowToPlay"
+        android:background="@drawable/how_to_play"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/buttonSettings"
+        android:layout_centerHorizontal="true"/>
+
+    <ImageButton
+        android:id="@+id/buttonSettings"
+        android:background="@drawable/settings"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"/>
+</RelativeLayout>

@@ -1,7 +1,8 @@
 <resources>
     <string name="app_name">ScavengerHaunt</string>
-
-    <string name="title_activity_how_to_play">HowToPlay</string>
-    <string name="dummy_button">Dummy Button</string>
-    <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="how_to_play_title">How to Play</string>
+    <string name="how_to_play_text">TEST TEST TEST\n... ... ...\n</string>
+    <string name="sound_title">Sound</string>
+    <string name="sound_summary">Turn the sound on or off</string>
+    <string name="stage_select_title">Select a Stage</string>
 </resources>
