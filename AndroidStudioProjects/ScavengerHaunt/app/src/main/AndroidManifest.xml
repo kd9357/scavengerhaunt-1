@@ -27,7 +27,7 @@
             android:label="Settings"
             android:screenOrientation="landscape"/>
         <activity
-            android:name=".StageSelect"
+            android:name=".StageSelectActivity"
             android:screenOrientation="landscape">
         </activity>
     </application>

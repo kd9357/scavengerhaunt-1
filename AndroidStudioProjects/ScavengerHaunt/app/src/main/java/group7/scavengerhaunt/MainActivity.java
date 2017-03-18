@@ -45,7 +45,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View v) {
         //Go to stage select screen
         if(v==buttonStageSelect) {
-            startActivity(new Intent(this, StageSelect.class));
+            startActivity(new Intent(this, StageSelectActivity.class));
         }//Go to how to play screen
         else if(v==buttonHowToPlay) {
             startActivity(new Intent(this, HowToPlayActivity.class));

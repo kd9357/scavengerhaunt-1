@@ -8,7 +8,7 @@
     android:paddingLeft="@dimen/stage_select_horizontal_margin"
     android:paddingRight="@dimen/stage_select_horizontal_margin"
     android:paddingTop="@dimen/stage_select_vertical_margin"
-    tools:context="group7.scavengerhaunt.StageSelect">
+    tools:context="group7.scavengerhaunt.StageSelectActivity">
 
     <TextView
         android:id="@+id/stage_select_title"
@@ -20,11 +20,17 @@
         android:textSize="50sp"
         android:textStyle="bold"
         android:paddingBottom="20dp"/>
+    <group7.scavengerhaunt.StageView
+        android:id="@+id/stageView"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="25dp"/>
 
     <ImageButton
         android:id="@+id/stage_select_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@drawable/stage_icon_placeholder"
+
         android:layout_below="@+id/stage_select_title"/>
+        <!--android:background="@drawable/stage_icon_placeholder"/>-->
 </RelativeLayout>
