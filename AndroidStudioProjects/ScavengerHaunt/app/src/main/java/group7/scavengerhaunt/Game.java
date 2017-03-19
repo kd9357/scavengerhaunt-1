@@ -5,6 +5,7 @@ package group7.scavengerhaunt;
  * This class runs under the hood of the game
  */
 
+//Right now not being used
 public class Game {
     private static final String TAG = "Game Background Runner";
 

@@ -24,13 +24,12 @@
         android:id="@+id/stageView"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="25dp"/>
-
-    <ImageButton
-        android:id="@+id/stage_select_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-
         android:layout_below="@+id/stage_select_title"/>
+
+    <!--<ImageButton-->
+        <!--android:id="@+id/stage_select_button"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_below="@+id/stage_select_title"/>-->
         <!--android:background="@drawable/stage_icon_placeholder"/>-->
 </RelativeLayout>

@@ -19,7 +19,7 @@ public class StageView extends View {
     private Bitmap mLockedStage;
     private Bitmap mUnlockedStage;
     private Paint mPaint;
-    private Game mGame;
+    //private Game mGame;
     //0: locked, 1 unlocked
     private int[] mUnlockedStages;
 
@@ -29,9 +29,9 @@ public class StageView extends View {
     }
 
     //Is this necessary?
-    public void setGame(Game game) {
-        mGame = game;
-    }
+//    public void setGame(Game game) {
+//        mGame = game;
+//    }
 
     public void setUnlockedStages(int[] unlockedStages) {
         mUnlockedStages = unlockedStages;
@@ -47,7 +47,7 @@ public class StageView extends View {
     @Override
     public void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        int buttonSize = 100;
+        int buttonSize = getWidth() / 5;
         Rect drawingRect = new Rect();
         //Draw on button locations
         //TODO: Actually calculate button locations
