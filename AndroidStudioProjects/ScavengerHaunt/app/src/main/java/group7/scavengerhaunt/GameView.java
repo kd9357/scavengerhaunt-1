@@ -41,6 +41,7 @@ public class GameView extends SurfaceView implements Runnable {
             player.update();
             draw();
             controlFrameRate();
+            //Check if won, if yes set stage as cleared in unlockedStages
         }
     }
 
@@ -48,7 +49,10 @@ public class GameView extends SurfaceView implements Runnable {
         if(surfaceHolder.getSurface().isValid()) {
             canvas = surfaceHolder.lockCanvas();
             canvas.drawColor(Color.BLACK);
+            canvas.save();
+            canvas.rotate((float)player.getAngleDegrees(), player.getCenterX(), player.getCenterY());
             canvas.drawBitmap(player.getImage(), player.getX(), player.getY(), paint);
+            canvas.restore();
             surfaceHolder.unlockCanvasAndPost(canvas);
         }
     }

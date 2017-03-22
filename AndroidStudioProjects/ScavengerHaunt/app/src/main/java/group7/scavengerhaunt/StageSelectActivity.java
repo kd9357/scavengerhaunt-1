@@ -13,6 +13,9 @@ public class StageSelectActivity extends AppCompatActivity implements View.OnTou
     //private ImageButton buttonStage;
     private StageView mStageView;
 
+    //Must persist on application close
+    private int[] unlockedStages = {1, 0, 0, 0, 0};
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -30,9 +33,6 @@ public class StageSelectActivity extends AppCompatActivity implements View.OnTou
 
         //adding a click listener (imagebutton)
         //buttonStage.setOnClickListener(this);
-
-        //TODO:Refactor and allow code to programmatically add locked and unlocked stages
-        //Maybe make this a BoardView (from tutorial) instead?
     }
 
     //If using canvas
