@@ -19,22 +19,17 @@ public class StageView extends View {
     private Bitmap mLockedStage;
     private Bitmap mUnlockedStage;
     private Paint mPaint;
-    //private Game mGame;
+
     //0: locked, 1 unlocked
-    private int[] mUnlockedStages;
+    private int[] mStages;
 
     public StageView(Context context, AttributeSet attrs) {
         super(context, attrs);
         initialize();
     }
 
-    //Is this necessary?
-//    public void setGame(Game game) {
-//        mGame = game;
-//    }
-
-    public void setUnlockedStages(int[] unlockedStages) {
-        mUnlockedStages = unlockedStages;
+    public void setStages(int[] stages) {
+        mStages = stages;
     }
 
     public void initialize() {
@@ -42,6 +37,14 @@ public class StageView extends View {
         mUnlockedStage = BitmapFactory.decodeResource(getResources(), R.drawable.stage_icon_placeholder);
 
         mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    }
+
+    public int getStageWidth() {
+        return getWidth();
+    }
+
+    public int getStageHeight() {
+        return getHeight();
     }
 
     @Override
@@ -52,24 +55,29 @@ public class StageView extends View {
         //Draw on button locations
         //TODO: Actually calculate button locations
         //As it stands now the buttons are not in the right position/scale
-        int index = 0;
-        for(int row = 0; row < getHeight(); row += buttonSize) { //by column
-            for(int column = 0; column < getWidth(); column += buttonSize) { //by row
-                drawingRect.left = column;
-                drawingRect.top = row;
-                drawingRect.right = drawingRect.left + buttonSize;
-                drawingRect.bottom = drawingRect.top + buttonSize;
-                if(index < mUnlockedStages.length && mUnlockedStages[index] == 0) {
-                    canvas.drawBitmap(mLockedStage, null, drawingRect, null);
-                }
-                else if(index < mUnlockedStages.length && mUnlockedStages[index] == 1) {
-                    canvas.drawBitmap(mUnlockedStage, null, drawingRect, null);
-                }
-                index++;
-
+        int r = 0;
+        int c = 0;
+        for(int i = 0; i < mStages.length; i++) {
+            drawingRect.left = c;
+            drawingRect.top = r;
+            drawingRect.right = c + buttonSize;
+            drawingRect.bottom = r + buttonSize;
+            //Draw Locked Stage
+            if(mStages[i] == 0) {
+                canvas.drawBitmap(mLockedStage, null, drawingRect, mPaint);
+            }
+            //Draw Unlocked Stage
+            else {
+                //Should also draw i + 1 over the unlocked stage bitmap
+                canvas.drawBitmap(mUnlockedStage, null, drawingRect, mPaint);
+            }
+            c += buttonSize;
+            if(c > getWidth()) {
+                c = 0;
+                r += buttonSize;
+                //Unlikely to happen, but possibly add pagination for more stages
             }
         }
-
     }
 
 }
