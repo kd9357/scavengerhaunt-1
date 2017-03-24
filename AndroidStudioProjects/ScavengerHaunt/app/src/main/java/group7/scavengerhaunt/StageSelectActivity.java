@@ -2,11 +2,14 @@ package group7.scavengerhaunt;
 
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.res.Resources;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.TextView;
 
 public class StageSelectActivity extends AppCompatActivity implements View.OnTouchListener{
 
@@ -14,54 +17,44 @@ public class StageSelectActivity extends AppCompatActivity implements View.OnTou
     private StageView mStageView;
 
     //Must persist on application close
-    private int[] unlockedStages = {1, 0, 0, 0, 0};
+    private int[] mStages = {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+
+    private int buttonSize;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_stage_select);
 
-        //Getting the button
-        //buttonStage = (ImageButton) findViewById(R.id.stage_select_button);
-
-        //Use View/canvas instead?
+        //Using Canvas to display buttons
         mStageView = (StageView) findViewById(R.id.stageView);
-        //Grab save data
-        int[] temp = {1, 0, 0, 0, 0, 0, 0};
-        mStageView.setUnlockedStages(temp);
+        //Grab saved data here
+        mStageView.setStages(mStages);
         mStageView.setOnTouchListener(this);
-
-        //adding a click listener (imagebutton)
-        //buttonStage.setOnClickListener(this);
     }
 
-    //If using canvas
-    // Listen for touches on the board. Only apply move if game not over.
-    //TODO: Calculate which item touched given xy coordinates
-//    private View.OnTouchListener mTouchListener = new View.OnTouchListener() {
-//        public boolean onTouch(View v, MotionEvent event) {
-//            //Set location, startActivity if unlocked
-//            //FOR NOW: touching the screen will start the game
-//            startActivity(new Intent(this, GameActivity.class));
-//            // So we aren't notified of continued events when finger is moved
-//            return false;
-//        }
-//    };
-
     public boolean onTouch(View v, MotionEvent event) {
+        //TODO: Calculate which item touched given xy coordinates
         //Right now just touching the screen starts a default game
-        startActivity(new Intent(this, GameActivity.class));
+        buttonSize = mStageView.getWidth() / 5;
+        int xCoord = (int)event.getX();
+        int yCoord = (int)event.getY();
+        if(xCoord > 0 && xCoord < buttonSize && yCoord > 0 && yCoord < buttonSize) {
+            startActivity(new Intent(this, GameActivity.class));
+        }
+
         //so we aren't notified of continued events when finger is moved
         return false;
     }
 
-    //If using imageButtons
-//    @Override
-//    public void onClick(View v) {
-//        //Start game activity
-////        if(v==buttonStage) {
-////            //Should tell game activity character spawn point, obstacles, other info
-////            //startActivity(new Intent(this, GameActivity.class));
-////        }
-//    }
+    //Used to calculate screen location
+    public static int dpToPx(int dp)
+    {
+        return (int) (dp * Resources.getSystem().getDisplayMetrics().density);
+    }
+
+    public static int spToPx(int sp)
+    {
+        return (int) (sp * Resources.getSystem().getDisplayMetrics().scaledDensity);
+    }
 }

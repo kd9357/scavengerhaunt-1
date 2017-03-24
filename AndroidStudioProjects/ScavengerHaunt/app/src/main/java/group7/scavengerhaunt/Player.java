@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
+import android.graphics.Rect;
 import android.util.Log;
 
 
@@ -30,6 +31,9 @@ public class Player {
     private int centerX;
     private int centerY;
 
+    //Collision Detection
+    private Rect hitBox;
+
     //The point the player should travel to
     private int destinationX;
     private int destinationY;
@@ -38,24 +42,27 @@ public class Player {
     //The normalized direction the player should be heading to
     private double directionX;
     private double directionY;
-    //Player's orientation
-    private double facingX = 0;
-    private double facingY = 1;
+    //Player's heading in relation with North
     private double angleDegrees = 0;
 
     //Movement speed
     private int speed;
     private boolean moving = false;
 
+    //Has key?
+    private boolean hasKey = false;
+
     public Player(Context context, int screenX, int screenY) {
-        x = 500;
-        y = 500;
-        speed = 15;
         //Set current orientation to point northwards as default
         image = BitmapFactory.decodeResource(context.getResources(), R.drawable.placeholder_player);
+        //Currently assuming player is square
         imageSize = image.getWidth();
+        x = screenX / 2 - imageSize / 2;
+        y = screenY / 2 - imageSize / 2;
+        speed = 10;
         centerX = x + imageSize / 2;
         centerY = y + imageSize / 2;
+        hitBox = new Rect(x, y, x + imageSize, y + imageSize);
         screenMaxX = screenX - imageSize;
         screenMaxY = screenY - imageSize;
     }
@@ -63,30 +70,19 @@ public class Player {
     //Controls player location
     public void update() {
         if(moving) {
-            //Set new orientation
-//            int distX = destinationX - centerX;
-//            int distY = destinationY - centerY;
-//            double angleRadians = Math.atan2(distY, distX);
-//            float angleDegrees = (float)Math.toDegrees(angleRadians);
-//            if(angleDegrees < 0)
-//                angleDegrees = 360 + angleDegrees;
+            //Set orientation
             angleDegrees = (float) GameActivity.getAngle(directionX, directionY);
-            if(directionX < 0) {
+            if(directionX < 0)
                 angleDegrees = -angleDegrees;
-            }
-
             //Set new location
             x += directionX * speed;
             centerX = x + imageSize / 2;
             y += directionY * speed;
             centerY = y + imageSize / 2;
             distance = calculateDistance(destinationX, destinationY);
-            facingX = directionX;
-            facingY = directionY;
             //Reached goal
-            if(distance <= 50) {
+            if(distance <= 50)
                 stopMoving();
-            }
         }
         //Ensure player does not leave screen
         if(x > screenMaxX)
@@ -97,8 +93,14 @@ public class Player {
             y = screenMaxY;
         else if(y < screenMinY)
             y = screenMinY;
+
         centerX = x + imageSize / 2;
         centerY = y + imageSize / 2;
+
+        hitBox.left = x;
+        hitBox.top = y;
+        hitBox.right = x + imageSize;
+        hitBox.bottom = y + imageSize;
     }
 
     public void setDestination(int destX, int destY) {
@@ -116,6 +118,10 @@ public class Player {
     public void startMoving() { moving = true; }
 
     public void stopMoving() { moving = false; }
+
+    public void foundKey() {
+        hasKey = true;
+    }
 
     public Bitmap getImage() {
         return image;
@@ -141,4 +147,11 @@ public class Player {
         return angleDegrees;
     }
 
+    public Rect getHitBox() {
+        return hitBox;
+    }
+
+    public boolean hasKey() {
+        return hasKey;
+    }
 }

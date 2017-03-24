@@ -50,7 +50,13 @@ public class GameActivity extends AppCompatActivity {
         gameView.resume();
     }
 
-    //Given two vectors, return the angle
+    @Override
+    protected void onStop() {
+        super.onStop();
+        gameView.pause();
+    }
+
+    //Given a direction vector, find the heading in degrees
     public static double getAngle(double ux, double uy) {
         return Math.toDegrees(Math.acos(-uy));
     }
