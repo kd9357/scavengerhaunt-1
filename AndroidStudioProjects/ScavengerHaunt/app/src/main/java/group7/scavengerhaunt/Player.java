@@ -49,6 +49,9 @@ public class Player {
     private int speed;
     private boolean moving = false;
 
+    //Has key?
+    private boolean hasKey = false;
+
     public Player(Context context, int screenX, int screenY) {
         //Set current orientation to point northwards as default
         image = BitmapFactory.decodeResource(context.getResources(), R.drawable.placeholder_player);
@@ -56,7 +59,7 @@ public class Player {
         imageSize = image.getWidth();
         x = screenX / 2 - imageSize / 2;
         y = screenY / 2 - imageSize / 2;
-        speed = 15;
+        speed = 10;
         centerX = x + imageSize / 2;
         centerY = y + imageSize / 2;
         hitBox = new Rect(x, y, x + imageSize, y + imageSize);
@@ -116,6 +119,10 @@ public class Player {
 
     public void stopMoving() { moving = false; }
 
+    public void foundKey() {
+        hasKey = true;
+    }
+
     public Bitmap getImage() {
         return image;
     }
@@ -142,5 +149,9 @@ public class Player {
 
     public Rect getHitBox() {
         return hitBox;
+    }
+
+    public boolean hasKey() {
+        return hasKey;
     }
 }
