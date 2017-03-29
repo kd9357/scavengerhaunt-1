@@ -1,6 +1,5 @@
 package group7.scavengerhaunt;
 
-import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -8,8 +7,6 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
-import android.graphics.drawable.shapes.Shape;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -21,40 +18,50 @@ import android.view.SurfaceView;
 
 //SurfaceView implementation to show gamestate
 public class GameView extends SurfaceView implements Runnable {
+    private final int mColumns = 20;
+    private final int mRows = 12;
+    //Determines the minimum size of each object
+    public static int tileWidth;
+    public static int tileHeight;
+
     //This variable is volatile for when the phone pauses or not
     volatile boolean playing;
     //Game thread
     private Thread gameThread = null;
 
     private Bitmap background;
-    private Bitmap scaledBitmap;
+    private Bitmap wall;
 
     private Player player;
-    private Door door;
-    private Key key;
+    private Interactables.Door door;
+    private Interactables.Key key;
+    private Obstacles.Table table;
+    private Obstacles.LoungeChair loungeChair;
 
     private Paint paint;
     private Canvas canvas;
     private SurfaceHolder surfaceHolder;
 
     private boolean gameFinished = false;
-    private boolean gameWon = false;
 
     private Context context;
 
     public GameView(Context context, int screenX, int screenY) {
         super(context);
         this.context = context;
-        player = new Player(context, screenX, screenY);
-        door = new Door(context, 0, 0);
-        key = new Key(context, screenX - screenX/3, screenY - screenY/3);
+        tileWidth = screenX / mColumns;
+        tileHeight = screenY / mRows;
+        player = new Player(context, screenX, screenY, tileWidth * 2, tileHeight * 2);
+        door = new Interactables.Door(context, 0, 0, tileWidth * 2, tileHeight * 2);
+        key = new Interactables.Key(context, screenX - screenX/3, screenY - screenY/3, tileWidth, tileHeight);
+        table = new Obstacles.Table(context, tileWidth * 4, tileHeight *  4, 6, 6);
+        loungeChair = new Obstacles.LoungeChair(context, tileWidth * 16, tileHeight * 8, 4, 4);
         surfaceHolder = getHolder();
         paint = new Paint();
-        background = BitmapFactory.decodeResource(context.getResources(), R.drawable.background);
-        scaledBitmap = Bitmap.createScaledBitmap(background,
-                screenX,
-                screenY,
-                true);
+        Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.floorboard);
+        background = Bitmap.createScaledBitmap(temp, screenX, screenY, true);
+        temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.wall);
+        wall = Bitmap.createScaledBitmap(temp, tileWidth * 2, screenY, true);
     }
 
     @Override
@@ -69,7 +76,19 @@ public class GameView extends SurfaceView implements Runnable {
     }
 
     public void update() {
-        player.update();
+        int[] newCoords = player.update();
+//        if(!detectCollision(playerHitBox, table.getHitBox()))
+//            player.setLocation(playerHitBox.left, playerHitBox.top);
+        int newX = player.getCenterX();
+        int newY = player.getCenterY();
+        if(!table.detectCollision(newCoords[0], player.getCenterY()) &&
+                !loungeChair.detectCollision(newCoords[0], player.getCenterY()))
+            newX = newCoords[0];
+        if(!table.detectCollision(player.getCenterX(), newCoords[1]) &&
+                !loungeChair.detectCollision(player.getCenterX(), newCoords[1]))
+            newY = newCoords[1];
+
+        player.setLocation(newX,newY);
         if(detectCollision(player.getHitBox(), key.getHitBox())) {
             player.foundKey();
         }
@@ -83,29 +102,26 @@ public class GameView extends SurfaceView implements Runnable {
             if(gameFinished) {
                 canvas = surfaceHolder.lockCanvas();
                 canvas.drawColor(Color.WHITE);
-                //canvas.drawRect(0, 0, (float)canvas.getWidth(), (float)canvas.getHeight(), paint);
-//                paint.setColor(Color.BLACK);
-//                paint.setStyle(Paint.Style.FILL);
-//                canvas.drawPaint(paint);
-
                 paint.setColor(Color.BLACK);
                 paint.setTextSize(200);
-//                canvas.drawText("Some Text", 10, 25, paint);
-//                paint.setColor(0);
                 canvas.drawText("You won", 0, 7, 0, (float)canvas.getHeight()/2, paint);
                 surfaceHolder.unlockCanvasAndPost(canvas);
             }
             else {
                 canvas = surfaceHolder.lockCanvas();
                 canvas.drawColor(Color.BLACK);
-                canvas.drawBitmap(scaledBitmap, 0, 0, paint);
+                canvas.drawBitmap(background, 0, 0, paint);
+                canvas.drawBitmap(wall, 0, 0, paint);
+                if(!player.hasKey())
+                    canvas.drawBitmap(key.getImage(), key.getX(), key.getY(), paint);
+                canvas.drawBitmap(door.getImage(), door.getX(), door.getY(), paint);
+                canvas.drawBitmap(table.getImage(), table.getX(), table.getY(), paint);
+                canvas.drawBitmap(loungeChair.getImage(), loungeChair.getX(), loungeChair.getY(), paint);
+                //Draw player
                 canvas.save();
                 canvas.rotate((float) player.getAngleDegrees(), player.getCenterX(), player.getCenterY());
                 canvas.drawBitmap(player.getImage(), player.getX(), player.getY(), paint);
                 canvas.restore();
-                if(!player.hasKey())
-                    canvas.drawBitmap(key.getImage(), key.getX(), key.getY(), paint);
-                canvas.drawBitmap(door.getImage(), door.getX(), door.getY(), paint);
                 surfaceHolder.unlockCanvasAndPost(canvas);
             }
         }
@@ -121,10 +137,16 @@ public class GameView extends SurfaceView implements Runnable {
     }
 
     private boolean detectCollision(Rect a, Rect b) {
-        if (Rect.intersects(a, b)) {
-            return true;
-        }
-        return false;
+        //return Rect.intersects(a, b);
+        return detectCollisionX(a,b) && detectCollisionY(a,b);
+    }
+
+    private boolean detectCollisionX(Rect a, Rect b) {
+        return (a.left >= b.left && a.left <= b.right) || (b.left >= a.left && b.left <= a.right);
+    }
+
+    private boolean detectCollisionY(Rect a, Rect b) {
+        return (a.top >= b.top && a.top <= b.bottom) || (b.top >= a.top && b.top <= a.bottom);
     }
 
     public void pause() {

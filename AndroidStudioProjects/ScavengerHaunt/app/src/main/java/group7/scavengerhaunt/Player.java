@@ -15,7 +15,8 @@ import android.util.Log;
 public class Player {
     //Image
     private Bitmap image;
-    private int imageSize;
+    private int imageWidth;
+    private int imageHeight;
 
     //Screen Borders
     private int screenMinX = 0;
@@ -46,44 +47,52 @@ public class Player {
     private double angleDegrees = 0;
 
     //Movement speed
-    private int speed;
+    private int speed = 10;
     private boolean moving = false;
 
     //Has key?
     private boolean hasKey = false;
 
-    public Player(Context context, int screenX, int screenY) {
+    public Player(Context context, int screenX, int screenY, int tileWidth, int tileHeight) {
+        //For the wall
+        screenMinX = tileWidth;
         //Set current orientation to point northwards as default
-        image = BitmapFactory.decodeResource(context.getResources(), R.drawable.placeholder_player);
-        //Currently assuming player is square
-        imageSize = image.getWidth();
-        x = screenX / 2 - imageSize / 2;
-        y = screenY / 2 - imageSize / 2;
-        speed = 10;
-        centerX = x + imageSize / 2;
-        centerY = y + imageSize / 2;
-        hitBox = new Rect(x, y, x + imageSize, y + imageSize);
-        screenMaxX = screenX - imageSize;
-        screenMaxY = screenY - imageSize;
+        Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.placeholder_player);
+        image = Bitmap.createScaledBitmap(temp, tileWidth, tileHeight, true);
+        this.imageWidth = image.getWidth();
+        this.imageHeight = image.getHeight();
+        //Set position
+        x = screenX / 2;
+        y = screenY / 2;
+        centerX = x + imageWidth / 2;
+        centerY = y + imageHeight / 2;
+        hitBox = new Rect(x, y, x + imageWidth, y + imageHeight);
+        screenMaxX = screenX - imageWidth;
+        screenMaxY = screenY - imageHeight;
     }
 
     //Controls player location
-    public void update() {
+    public int[] update() {
+        int[] temp = {this.centerX, this.centerY};
         if(moving) {
             //Set orientation
             angleDegrees = (float) GameActivity.getAngle(directionX, directionY);
             if(directionX < 0)
                 angleDegrees = -angleDegrees;
-            //Set new location
-            x += directionX * speed;
-            centerX = x + imageSize / 2;
-            y += directionY * speed;
-            centerY = y + imageSize / 2;
-            distance = calculateDistance(destinationX, destinationY);
-            //Reached goal
-            if(distance <= 50)
-                stopMoving();
+            temp[0] += directionX * speed;
+            temp[1] += directionY * speed;
         }
+        return temp;
+    }
+
+    public void setLocation(int newX, int newY) {
+        x = newX - imageWidth/2;
+        y = newY - imageHeight/2;
+
+        distance = calculateDistance(destinationX, destinationY);
+        //Reached goal
+        if(distance <= 50)
+                stopMoving();
         //Ensure player does not leave screen
         if(x > screenMaxX)
             x = screenMaxX;
@@ -94,13 +103,13 @@ public class Player {
         else if(y < screenMinY)
             y = screenMinY;
 
-        centerX = x + imageSize / 2;
-        centerY = y + imageSize / 2;
+        centerX = x + imageWidth / 2;
+        centerY = y + imageHeight / 2;
 
         hitBox.left = x;
         hitBox.top = y;
-        hitBox.right = x + imageSize;
-        hitBox.bottom = y + imageSize;
+        hitBox.right = x + imageWidth;
+        hitBox.bottom = y + imageHeight;
     }
 
     public void setDestination(int destX, int destY) {

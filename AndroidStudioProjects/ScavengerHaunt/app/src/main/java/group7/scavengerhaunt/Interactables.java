@@ -37,4 +37,33 @@ public class Interactables {
         return y;
 
     }
+
+    /**
+     * Created by Kevin on 3/23/2017.
+     */
+
+    public static class Door extends Interactables {
+
+        public Door(Context context, int x, int y, int tileWidth, int tileHeight) {
+            super(context, x, y);
+            Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.door);
+            image = Bitmap.createScaledBitmap(temp, tileWidth, tileHeight * 2, true);
+            hitBox = new Rect(x, y, x + image.getWidth() + image.getWidth() / 4, y + image.getHeight());
+        }
+
+    }
+
+    /**
+     * Created by Kevin on 3/23/2017.
+     */
+
+    public static class Key extends Interactables {
+
+        public Key(Context context, int x, int y, int tileWidth, int tileHeight) {
+            super(context, x, y);
+            Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.stage_icon_locked_placeholder);
+            image = Bitmap.createScaledBitmap(temp, tileWidth, tileHeight, true);
+            hitBox = new Rect(x, y, x + image.getWidth(), y + image.getHeight());
+        }
+    }
 }
