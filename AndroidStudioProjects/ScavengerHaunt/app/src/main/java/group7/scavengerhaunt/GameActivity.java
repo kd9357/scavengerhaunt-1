@@ -8,8 +8,6 @@ import android.view.Display;
 public class GameActivity extends AppCompatActivity {
 
     private static final String TAG = "Game Interface";
-    //Represents the internal state of the game
-    private Game mGame;
 
     //Surface view of game
     private GameView gameView;
@@ -56,7 +54,7 @@ public class GameActivity extends AppCompatActivity {
         gameView.pause();
     }
 
-    //Given a direction vector, find the heading in degrees
+    //Given a direction vector, find the heading in degrees in relation to north
     public static double getAngle(double ux, double uy) {
         return Math.toDegrees(Math.acos(-uy));
     }

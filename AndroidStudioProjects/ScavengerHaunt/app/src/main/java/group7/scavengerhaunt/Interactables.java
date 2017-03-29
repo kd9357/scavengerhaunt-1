@@ -35,7 +35,6 @@ public class Interactables {
 
     public int getY() {
         return y;
-
     }
 
     /**
@@ -61,7 +60,7 @@ public class Interactables {
 
         public Key(Context context, int x, int y, int tileWidth, int tileHeight) {
             super(context, x, y);
-            Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.stage_icon_locked_placeholder);
+            Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.key);
             image = Bitmap.createScaledBitmap(temp, tileWidth, tileHeight, true);
             hitBox = new Rect(x, y, x + image.getWidth(), y + image.getHeight());
         }

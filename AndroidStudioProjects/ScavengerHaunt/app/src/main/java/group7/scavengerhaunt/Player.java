@@ -53,9 +53,11 @@ public class Player {
     //Has key?
     private boolean hasKey = false;
 
-    public Player(Context context, int screenX, int screenY, int tileWidth, int tileHeight) {
+    //Context, screenX min, screenY min, screenX max, screenY max, width of player, width of height
+    public Player(Context context, int minX, int minY, int screenX, int screenY, int tileWidth, int tileHeight) {
         //For the wall
-        screenMinX = tileWidth;
+        screenMinX = minX;
+        screenMinY = minY;
         //Set current orientation to point northwards as default
         Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.placeholder_player);
         image = Bitmap.createScaledBitmap(temp, tileWidth, tileHeight, true);
@@ -85,6 +87,7 @@ public class Player {
         return temp;
     }
 
+    //Sets player location
     public void setLocation(int newX, int newY) {
         x = newX - imageWidth/2;
         y = newY - imageHeight/2;
