@@ -16,20 +16,34 @@ public class Obstacles {
     protected int x;
     protected int y;
 
+    //Lights attached to obstacle, if any
+    protected boolean hasLight = false;
+    protected Lights light;
+
     public Obstacles(Context context, int x, int y) {
         this.x = x;
         this.y = y;
+        //hasLight = false;
     }
 
     public boolean detectCollision(int playerX, int playerY) {
         return playerX >= hitBox.left && playerX <= hitBox.right && playerY >= hitBox.top && playerY <= hitBox.bottom;
     }
+
     public Bitmap getImage(){
         return image;
     }
 
     public Rect getHitBox() {
         return hitBox;
+    }
+
+    public boolean hasLight() {
+        return hasLight;
+    }
+
+    public Lights getLight() {
+        return light;
     }
 
     public int getX() {
@@ -41,11 +55,15 @@ public class Obstacles {
     }
 
     public static class Table extends Obstacles {
+        //Hardcoded to be one tile shorter (-y) than normal
         public Table(Context context, int x, int y, int scaleX, int scaleY) {
             super(context, x, y);
             Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.table);
             image = Bitmap.createScaledBitmap(temp, GameView.tileWidth * scaleX, GameView.tileHeight * scaleY, true);
             hitBox = new Rect(x, y, x + image.getWidth(), y + image.getHeight() - GameView.tileHeight);
+            hasLight = true;
+            //Messy, hardcoded values
+            light = new Lights(x + image.getWidth()/2 - GameView.tileWidth / 3, y + image.getHeight()/2 - GameView.tileHeight / 2, GameView.tileWidth * 4);
         }
     }
 
@@ -75,6 +93,8 @@ public class Obstacles {
             p2[1] = (float)y;
             p3[0] = (float)(x + image.getWidth());
             p3[1] = (float)(y + image.getHeight() + GameView.tileHeight);
+            hasLight = true;
+            light = new Lights(x + image.getWidth() / 2, y + image.getHeight() / 2, GameView.tileWidth * scaleX);
         }
 
         //Calculating Barycentric coordinates (flashbacks to computer graphics)

@@ -10,6 +10,7 @@ import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -51,6 +52,7 @@ public class GameView extends View implements Runnable {
     private Interactables.Door door;
     private Interactables.Key key;
     private List<Obstacles> obstacleList = new ArrayList<>();
+    private List<Lights> lightList = new ArrayList<>();
 
     //For drawing
     private Paint paint;
@@ -98,6 +100,11 @@ public class GameView extends View implements Runnable {
         obstacleList.add(new Obstacles.Table(context, tileWidth * 4, tileHeight *  4, 6, 6));
         obstacleList.add(new Obstacles.LoungeChair(context, tileWidth * 16, tileHeight * 8, 4, 4));
         obstacleList.add(new Obstacles.Fireplace(context, tileWidth *15, 0, 6, 5));
+        //Create our lights
+        for(Obstacles o : obstacleList) {
+            if(o.hasLight())
+                lightList.add(o.getLight());
+        }
     }
 
     @Override
@@ -153,13 +160,20 @@ public class GameView extends View implements Runnable {
             for (Obstacles o : obstacleList)
                 canvas.drawBitmap(o.getImage(), o.getX(), o.getY(), paint);
 
-            //Draw Lights
+            //Draw Flashlight
             darkness.drawRect(0, 0, screenMaxX, screenMaxY, paint);
-            darkness.drawCircle(tileWidth * 7, screenMaxY/2, tileWidth * 4, transparentPaint);
-            darkness.drawCircle(tileWidth * 18, tileHeight * 2, tileWidth * 6, transparentPaint);
+            darkness.save();
+            darkness.rotate((float) player.getAngleDegrees(), player.getCenterX(), player.getCenterY());
+            Lights.Flashlight f = player.getFlashLight();
+            darkness.drawArc(f.getCircle(), f.getStartingAngle(), f.getSweepingAngle(), true, transparentPaint);
+            darkness.restore();
+            //Draw other lights
+            for(Lights l : lightList) {
+                darkness.drawCircle(l.getX(), l.getY(), l.getRadius(), transparentPaint);
+            }
             canvas.drawBitmap(darknessBitmap, 0, 0, paint);
             
-            //Draw player
+            //Draw player over lights (for now)
             canvas.save();
             canvas.rotate((float) player.getAngleDegrees(), player.getCenterX(), player.getCenterY());
             canvas.drawBitmap(player.getImage(), player.getX(), player.getY(), paint);
@@ -175,11 +189,11 @@ public class GameView extends View implements Runnable {
             else
                 canvas.drawText("You died!", 0, 9, 0, (float)canvas.getHeight()/2, paint);
         }
-
-
 }
 
     //This supposedly makes the game run at a steady 60fps
+    //TODO: modify the length of sleep to maintain steady fps
+    //We can shoot for 30fps instead
     private void controlFrameRate() {
         try {
             gameThread.sleep(17);

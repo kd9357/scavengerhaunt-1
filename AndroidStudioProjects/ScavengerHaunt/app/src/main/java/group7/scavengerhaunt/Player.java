@@ -50,6 +50,12 @@ public class Player {
     private int speed = 10;
     private boolean moving = false;
 
+    //Attached classes
+    Lights.Flashlight light;
+    private int radius;
+    private int startingAngle;
+    private int sweepingAngle;
+
     //Has key?
     private boolean hasKey = false;
 
@@ -71,9 +77,14 @@ public class Player {
         hitBox = new Rect(x, y, x + imageWidth, y + imageHeight);
         screenMaxX = screenX - imageWidth;
         screenMaxY = screenY - imageHeight;
+        //Create flashlight
+        radius = tileWidth * 4; //Is actually tileWidth * 8 of original view
+        startingAngle = 225;
+        sweepingAngle = 90;
+        light = new Lights.Flashlight(centerX, centerY, radius, startingAngle, sweepingAngle);
     }
 
-    //Controls player location
+    //Controls player location & flashlight radius
     public int[] update() {
         int[] temp = {this.centerX, this.centerY};
         if(moving) {
@@ -84,6 +95,7 @@ public class Player {
             temp[0] += directionX * speed;
             temp[1] += directionY * speed;
         }
+        //TODO: if doing battery, update radius of light here
         return temp;
     }
 
@@ -113,6 +125,8 @@ public class Player {
         hitBox.top = y;
         hitBox.right = x + imageWidth;
         hitBox.bottom = y + imageHeight;
+
+        light.setCircle(centerX, centerY, radius);
     }
 
     public void setDestination(int destX, int destY) {
@@ -161,6 +175,10 @@ public class Player {
 
     public Rect getHitBox() {
         return hitBox;
+    }
+
+    public Lights.Flashlight getFlashLight() {
+        return light;
     }
 
     public boolean hasKey() {
