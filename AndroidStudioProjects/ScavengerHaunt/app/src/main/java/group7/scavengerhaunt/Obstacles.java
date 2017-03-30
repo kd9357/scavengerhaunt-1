@@ -57,4 +57,41 @@ public class Obstacles {
             hitBox = new Rect(x, y, x + image.getWidth(), y + image.getHeight());
         }
     }
+
+    //The fireplace is a triangle, not a rectangle hitbox
+    public static class Fireplace extends Obstacles {
+        private float[] p1 = new float[2];
+        private float[] p2 = new float[2];
+        private float[] p3 = new float[2];
+
+        //Right now we're hardcoding the hitbox to be tile wider (to the left) and lower than normal
+        public Fireplace(Context context, int x, int y, int scaleX, int scaleY) {
+            super(context, x, y);
+            Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.fireplace_complete);
+            image = Bitmap.createScaledBitmap(temp, GameView.tileWidth * scaleX, GameView.tileHeight * scaleY, true);
+            p1[0] = (float)x - GameView.tileWidth;
+            p1[1] = (float)y;
+            p2[0] = (float)(x + image.getWidth());
+            p2[1] = (float)y;
+            p3[0] = (float)(x + image.getWidth());
+            p3[1] = (float)(y + image.getHeight() + GameView.tileHeight);
+        }
+
+        //Calculating Barycentric coordinates (flashbacks to computer graphics)
+        public boolean detectCollision(int playerX, int playerY) {
+            float pX = (float)playerX;
+            float pY = (float)playerY;
+
+            float alpha = ((p2[1] - p3[1]) * (pX - p3[0])
+                    + (p3[0] - p2[0]) * (pY - p3[1]))
+                    / ((p2[1] - p3[1]) * (p1[0] - p3[0])
+                    + (p3[0] - p2[0]) * (p1[1] - p3[1]));
+            float beta = ((p3[1] - p1[1]) * (pX - p3[0])
+                    + (p1[0] - p3[0]) * (pY - p3[1]))
+                    / ((p2[1] - p3[1])  * (p1[0] - p3[0])
+                    + (p3[0] - p2[0]) * (p1[1] - p3[1]));
+            float gamma = 1.0f - alpha - beta;
+            return alpha > 0 && beta > 0 && gamma > 0;
+        }
+    }
 }

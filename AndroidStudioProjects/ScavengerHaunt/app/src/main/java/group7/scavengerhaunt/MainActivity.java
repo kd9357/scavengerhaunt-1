@@ -17,7 +17,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private int SETTINGS_REQUEST = 1;
 
-    public boolean mSoundOn = true;
+    public static boolean mSoundOn = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
