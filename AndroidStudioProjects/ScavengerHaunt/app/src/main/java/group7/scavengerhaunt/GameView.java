@@ -196,7 +196,7 @@ public class GameView extends View implements Runnable {
     //We can shoot for 30fps instead
     private void controlFrameRate() {
         try {
-            gameThread.sleep(17);
+            gameThread.sleep(30);
         }
         catch (InterruptedException e) {
             e.printStackTrace();
