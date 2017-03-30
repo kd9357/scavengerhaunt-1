@@ -7,12 +7,15 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +26,7 @@ import java.util.List;
  */
 
 //SurfaceView implementation to show state of the game
-public class GameView extends SurfaceView implements Runnable {
+public class GameView extends View implements Runnable {
     private final int NUM_COLUMNS = 20;
     private final int NUM_ROWS = 12;
     //Determines the minimum size of each object
@@ -51,8 +54,9 @@ public class GameView extends SurfaceView implements Runnable {
 
     //For drawing
     private Paint paint;
-    private Canvas canvas;
-    private SurfaceHolder surfaceHolder;
+    private Paint transparentPaint;
+    private Canvas darkness;
+    private Bitmap darknessBitmap;
 
     //Determines the text of the dialog fragment
     private boolean gameWon = false;
@@ -70,8 +74,16 @@ public class GameView extends SurfaceView implements Runnable {
         screenMaxY = screenY;
         tileWidth = screenX / NUM_COLUMNS;
         tileHeight = screenY / NUM_ROWS;
-        surfaceHolder = getHolder();
-        paint = new Paint();
+        paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        paint.setColor(getResources().getColor(R.color.colorPrimary));
+
+        //Setup lighting
+        darknessBitmap = Bitmap.createBitmap(screenX, screenY, Bitmap.Config.ARGB_8888);
+        darkness = new Canvas(darknessBitmap);
+        transparentPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        transparentPaint.setColor(Color.TRANSPARENT);
+        transparentPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
+
         //Create our background and decorations
         Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.floorboard);
         background = Bitmap.createScaledBitmap(temp, screenX, screenY, true);
@@ -93,11 +105,9 @@ public class GameView extends SurfaceView implements Runnable {
         while(playing) {
             //Update and draw every frame
             update();
-            draw();
+            postInvalidate();
             controlFrameRate();
         }
-        if(gameFinished)
-            handleEndGame();
     }
 
     public void update() {
@@ -127,29 +137,48 @@ public class GameView extends SurfaceView implements Runnable {
         }
     }
 
-    public void draw() {
-        if(surfaceHolder.getSurface().isValid()) {
-            canvas = surfaceHolder.lockCanvas();
-            canvas.drawColor(Color.BLACK);
+    @Override
+    public void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+        if(!gameFinished) {
+            //canvas.drawColor(Color.BLACK);
             //Draw background
             canvas.drawBitmap(background, 0, 0, paint);
             canvas.drawBitmap(wall, 0, 0, paint);
             //Draw interactables
-            if(!player.hasKey())
+            if (!player.hasKey())
                 canvas.drawBitmap(key.getImage(), key.getX(), key.getY(), paint);
             canvas.drawBitmap(door.getImage(), door.getX(), door.getY(), paint);
             //Draw obstacles
-            for(Obstacles o : obstacleList) {
+            for (Obstacles o : obstacleList)
                 canvas.drawBitmap(o.getImage(), o.getX(), o.getY(), paint);
-            }
+
+            //Draw Lights
+            darkness.drawRect(0, 0, screenMaxX, screenMaxY, paint);
+            darkness.drawCircle(tileWidth * 7, screenMaxY/2, tileWidth * 4, transparentPaint);
+            darkness.drawCircle(tileWidth * 18, tileHeight * 2, tileWidth * 6, transparentPaint);
+            canvas.drawBitmap(darknessBitmap, 0, 0, paint);
+            
             //Draw player
             canvas.save();
             canvas.rotate((float) player.getAngleDegrees(), player.getCenterX(), player.getCenterY());
             canvas.drawBitmap(player.getImage(), player.getX(), player.getY(), paint);
             canvas.restore();
-            surfaceHolder.unlockCanvasAndPost(canvas);
         }
-    }
+        //Handle endgame (to be removed and replaced with dialog fragment)
+        else {
+            canvas.drawColor(Color.WHITE);
+            paint.setColor(Color.BLACK);
+            paint.setTextSize(200);
+            if(gameWon)
+                canvas.drawText("You won!", 0, 8, 0, (float)canvas.getHeight()/2, paint);
+            else
+                canvas.drawText("You died!", 0, 9, 0, (float)canvas.getHeight()/2, paint);
+        }
+
+
+}
+
     //This supposedly makes the game run at a steady 60fps
     private void controlFrameRate() {
         try {
@@ -210,20 +239,6 @@ public class GameView extends SurfaceView implements Runnable {
                 break;
         }
         return true;
-    }
-
-    public void handleEndGame() {
-        if(surfaceHolder.getSurface().isValid()) {
-            canvas = surfaceHolder.lockCanvas();
-            canvas.drawColor(Color.WHITE);
-            paint.setColor(Color.BLACK);
-            paint.setTextSize(200);
-            if(gameWon)
-                canvas.drawText("You won!", 0, 8, 0, (float)canvas.getHeight()/2, paint);
-            else
-                canvas.drawText("You died!", 0, 9, 0, (float)canvas.getHeight()/2, paint);
-            surfaceHolder.unlockCanvasAndPost(canvas);
-        }
     }
 
 }
