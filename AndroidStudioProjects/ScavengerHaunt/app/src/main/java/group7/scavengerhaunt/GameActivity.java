@@ -8,18 +8,18 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Display;
 import android.view.MotionEvent;
+import android.view.View;
+import android.widget.ImageButton;
 
-public class GameActivity extends AppCompatActivity {
+public class GameActivity extends AppCompatActivity implements View.OnClickListener{
 
     private static final String TAG = "Game Interface";
     private int SETTINGS_REQUEST = 1;
 
     //Surface view of game
     private GameView gameView;
-    private int tileWidth;
-    private int tileHeight;
-    private int screenMaxX;
-    private int screenMaxY;
+
+    private ImageButton buttonSettingsGear;
     //Is the game over or not?
     private boolean mGameOver;
 
@@ -27,22 +27,22 @@ public class GameActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_game);
 
         //Display object
         Display display = getWindowManager().getDefaultDisplay();
         //Get screen resolution
         Point size = new Point();
         display.getSize(size);
+        //SurfaceView
+        gameView = (GameView) findViewById(R.id.game_view);
+        //Eventually, initialize will have more parameters for spawn locations etc
+        gameView.initialize(size.x, size.y);
 
+        buttonSettingsGear = (ImageButton) findViewById(R.id.buttonSettingsGear);
+        buttonSettingsGear.setOnClickListener(this);
 
-        gameView = new GameView(this, size.x, size.y);
-        setContentView(gameView);
-
-        tileWidth = size.x / 20;
-        tileHeight = size.y / 12;
-        screenMaxX = size.x;
-        screenMaxY = size.y;
-        //setContentView(R.layout.activity_game);
+        setInstanceVarsFromSharedPrefs();
     }
 
     //Pause activity
@@ -77,19 +77,18 @@ public class GameActivity extends AppCompatActivity {
         }
     }
 
-    @Override
-    public boolean onTouchEvent(MotionEvent motionEvent) {
-//        if(motionEvent.getX() <= 1.5 * tileWidth && motionEvent.getY() >= screenMaxY - 1.5 * tileHeight) {
-//            Intent intent = new Intent(this, SettingsActivity.class);
-//            startActivityForResult(intent, SETTINGS_REQUEST);
-//        }
-        Log.d("Hello", "Pressed at " + motionEvent.getX() + ", " + motionEvent.getY());
-        return true;
-    }
-
     private void setInstanceVarsFromSharedPrefs() {
         SharedPreferences sharedPref = getPreferences(MODE_PRIVATE);
         MainActivity.mSoundOn = sharedPref.getBoolean("sound", true);
+    }
+
+    @Override
+    public void onClick(View v) {
+        //Go to settings screen
+        if(v==buttonSettingsGear) {
+            Intent intent = new Intent(this, SettingsActivity.class);
+            startActivityForResult(intent, SETTINGS_REQUEST);
+        }
     }
 
     //Given a direction vector, find the heading in degrees in relation to north

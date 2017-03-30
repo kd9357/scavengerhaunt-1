@@ -8,6 +8,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
@@ -38,9 +39,6 @@ public class GameView extends SurfaceView implements Runnable {
     //Game thread
     private Thread gameThread = null;
 
-    //HUD
-    private Bitmap settingsButton;
-
     //Static images
     private Bitmap background;
     private Bitmap wall;
@@ -58,12 +56,16 @@ public class GameView extends SurfaceView implements Runnable {
 
     //Determines the text of the dialog fragment
     private boolean gameWon = false;
+    private boolean gameFinished = false;
 
     Context context;
 
-    public GameView(Context context, int screenX, int screenY) {
-        super(context);
+    public GameView(Context context, AttributeSet attrs) {
+        super(context, attrs);
         this.context = context;
+    }
+
+    public void initialize(int screenX, int screenY) {
         screenMaxX = screenX;
         screenMaxY = screenY;
         tileWidth = screenX / NUM_COLUMNS;
@@ -84,9 +86,6 @@ public class GameView extends SurfaceView implements Runnable {
         obstacleList.add(new Obstacles.Table(context, tileWidth * 4, tileHeight *  4, 6, 6));
         obstacleList.add(new Obstacles.LoungeChair(context, tileWidth * 16, tileHeight * 8, 4, 4));
         obstacleList.add(new Obstacles.Fireplace(context, tileWidth *15, 0, 6, 5));
-        //Create our HUD
-        temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.settings_gear);
-        settingsButton = Bitmap.createScaledBitmap(temp, tileWidth, tileHeight, true);
     }
 
     @Override
@@ -97,9 +96,8 @@ public class GameView extends SurfaceView implements Runnable {
             draw();
             controlFrameRate();
         }
-        //Currently triggers this when pressing back for a fraction of a second
-        //Better to open up a dialog fragment asking if player wants to exit when back is detected
-        handleEndGame();
+        if(gameFinished)
+            handleEndGame();
     }
 
     public void update() {
@@ -124,6 +122,7 @@ public class GameView extends SurfaceView implements Runnable {
         }
         if(detectCollision(player.getHitBox(), door.getHitBox()) && player.hasKey()) {
             playing = false;
+            gameFinished = true;
             gameWon = true;
         }
     }
@@ -148,8 +147,6 @@ public class GameView extends SurfaceView implements Runnable {
             canvas.rotate((float) player.getAngleDegrees(), player.getCenterX(), player.getCenterY());
             canvas.drawBitmap(player.getImage(), player.getX(), player.getY(), paint);
             canvas.restore();
-            //Draw HUD
-            canvas.drawBitmap(settingsButton, tileWidth / 2, (int)(screenMaxY - 1.5 * tileHeight), paint);
             surfaceHolder.unlockCanvasAndPost(canvas);
         }
     }
@@ -204,14 +201,8 @@ public class GameView extends SurfaceView implements Runnable {
             //Screen is touched, face in destination direction
             //If held down, move in that direction as well
             case MotionEvent.ACTION_DOWN:
-                //TODO:May handle open settings activity here
-                if(motionEvent.getX() <= 1.5 * tileWidth && motionEvent.getY() >= screenMaxY - 1.5 * tileHeight) {
-                    Log.d("Hello", "Hi");
-                }
-                else {
-                    player.setDestination((int) motionEvent.getX(), (int) motionEvent.getY());
-                    player.startMoving();
-                }
+                player.setDestination((int) motionEvent.getX(), (int) motionEvent.getY());
+                player.startMoving();
                 break;
             //Screen is being pressed & moved, player should move
             case MotionEvent.ACTION_MOVE:
