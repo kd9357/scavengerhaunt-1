@@ -37,6 +37,10 @@ public class Interactables {
         return y;
     }
 
+    public boolean detectCollision(int playerX, int playerY) {
+        return playerX >= hitBox.left && playerX <= hitBox.right && playerY >= hitBox.top && playerY <= hitBox.bottom;
+    }
+
     /**
      * Created by Kevin on 3/23/2017.
      */
@@ -47,7 +51,7 @@ public class Interactables {
             super(context, x, y);
             Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.door);
             image = Bitmap.createScaledBitmap(temp, tileWidth, tileHeight * 2, true);
-            hitBox = new Rect(x, y, x + image.getWidth() + image.getWidth() / 4, y + image.getHeight());
+            hitBox = new Rect(x, y, x + image.getWidth() + image.getWidth() + 4, y + image.getHeight());
         }
 
     }

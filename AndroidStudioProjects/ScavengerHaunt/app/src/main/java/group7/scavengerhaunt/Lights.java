@@ -29,6 +29,12 @@ public class Lights {
         return radius;
     }
 
+    public void setCircle(int x, int y, int r) {
+        centerX = x;
+        centerY = y;
+        radius = r;
+    }
+
     public static class Flashlight extends Lights{
         //The base Circle with given radius. The light will be a sector of this
         private RectF circle;
@@ -48,6 +54,9 @@ public class Lights {
 
         public void setCircle(int x, int y, int r) {
             circle.set(x-r, y-r, x+r, y+r);
+            this.centerX = x;
+            this.centerY = y;
+            this.radius = r;
         }
 
         public void setStartingAngle(int theta) {

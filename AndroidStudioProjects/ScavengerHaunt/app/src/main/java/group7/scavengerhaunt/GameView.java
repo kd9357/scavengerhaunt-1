@@ -4,11 +4,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.BlurMaskFilter;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
+import android.graphics.RadialGradient;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.util.AttributeSet;
@@ -57,6 +59,7 @@ public class GameView extends View implements Runnable {
     //For drawing
     private Paint paint;
     private Paint transparentPaint;
+    private Paint normalLightsPaint;
     private Canvas darkness;
     private Bitmap darknessBitmap;
 
@@ -77,7 +80,8 @@ public class GameView extends View implements Runnable {
         tileWidth = screenX / NUM_COLUMNS;
         tileHeight = screenY / NUM_ROWS;
         paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        paint.setColor(getResources().getColor(R.color.colorPrimary));
+        //paint.setColor(getResources().getColor(R.color.colorPrimary));
+        paint.setColor(Color.BLACK);
 
         //Setup lighting
         darknessBitmap = Bitmap.createBitmap(screenX, screenY, Bitmap.Config.ARGB_8888);
@@ -85,6 +89,11 @@ public class GameView extends View implements Runnable {
         transparentPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         transparentPaint.setColor(Color.TRANSPARENT);
         transparentPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
+
+        normalLightsPaint = new Paint();
+        normalLightsPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_OUT));
+        normalLightsPaint.setColor(Color.TRANSPARENT);
+        normalLightsPaint.setMaskFilter(new BlurMaskFilter(60, BlurMaskFilter.Blur.NORMAL));
 
         //Create our background and decorations
         Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.floorboard);
@@ -97,10 +106,11 @@ public class GameView extends View implements Runnable {
         door = new Interactables.Door(context, 0, tileHeight, tileWidth * 2, tileHeight * 2);
         key = new Interactables.Key(context, screenX - screenX/3, screenY - screenY/3, tileWidth, tileHeight);
         //Create our obstacles
-        obstacleList.add(new Obstacles.Table(context, tileWidth * 4, tileHeight *  4, 6, 6));
+        obstacleList.add(new Obstacles.Table(context, tileWidth * 4, tileHeight *  4, 5, 5));
         obstacleList.add(new Obstacles.LoungeChair(context, tileWidth * 16, tileHeight * 8, 4, 4));
         obstacleList.add(new Obstacles.Fireplace(context, tileWidth *15, 0, 6, 5));
         //Create our lights
+        lightList.add(player.getSelfLight());
         for(Obstacles o : obstacleList) {
             if(o.hasLight())
                 lightList.add(o.getLight());
@@ -134,10 +144,11 @@ public class GameView extends View implements Runnable {
         player.setLocation(newX,newY);
 
         //Detect collision between interactables
-        if(detectCollision(player.getHitBox(), key.getHitBox())) {
+        //if(detectCollision(player.getHitBox(), key.getHitBox())) {
+        if(key.detectCollision(player.getCenterX(),player.getCenterY())) {
             player.foundKey();
         }
-        if(detectCollision(player.getHitBox(), door.getHitBox()) && player.hasKey()) {
+        if(door.detectCollision(player.getCenterX(),player.getCenterY()) && player.hasKey()) {
             playing = false;
             gameFinished = true;
             gameWon = true;
@@ -160,17 +171,39 @@ public class GameView extends View implements Runnable {
             for (Obstacles o : obstacleList)
                 canvas.drawBitmap(o.getImage(), o.getX(), o.getY(), paint);
 
-            //Draw Flashlight
+            //Draw other lights
             darkness.drawRect(0, 0, screenMaxX, screenMaxY, paint);
+            for(Lights l : lightList) {
+                darkness.drawCircle(l.getX(), l.getY(), l.getRadius(), normalLightsPaint);
+            }
+            //If using multiple bands
+//            Paint p = new Paint();
+//            p.setAlpha(80);
+//            darkness.drawRect(0, 0, screenMaxX, screenMaxY, p);
+            //paint.setAlpha(100);
+//            for(Lights l : lightList) {
+//                darkness.drawCircle(l.getX(), l.getY(), l.getRadius() - l.getRadius() / 3, transparentPaint);
+//            }
+//            darkness.drawRect(0, 0, screenMaxX, screenMaxY, p);
+//            for(Lights l : lightList) {
+//                darkness.drawCircle(l.getX(), l.getY(), l.getRadius() - 2 * l.getRadius() / 3, transparentPaint);
+//            }
+            //Draw Flashlight
             darkness.save();
             darkness.rotate((float) player.getAngleDegrees(), player.getCenterX(), player.getCenterY());
             Lights.Flashlight f = player.getFlashLight();
             darkness.drawArc(f.getCircle(), f.getStartingAngle(), f.getSweepingAngle(), true, transparentPaint);
+            darkness.drawArc(f.getCircle(), f.getStartingAngle(), f.getSweepingAngle(), true, normalLightsPaint);
+//            RadialGradient gradient = new RadialGradient(f.getX(), f.getY(), f.getRadius() + 1,
+//                    new int[] {0x00000000, 0xFF000000}, null, android.graphics.Shader.TileMode.CLAMP);
+//            Paint p = new Paint();
+            //p.setColor(Color.TRANSPARENT);
+//            p.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_OUT));
+//            p.setShader(gradient);
+            //darkness.drawArc(f.getCircle(), f.getStartingAngle(), f.getSweepingAngle(), true, p);
             darkness.restore();
-            //Draw other lights
-            for(Lights l : lightList) {
-                darkness.drawCircle(l.getX(), l.getY(), l.getRadius(), transparentPaint);
-            }
+
+            //Draws the shadows
             canvas.drawBitmap(darknessBitmap, 0, 0, paint);
             
             //Draw player over lights (for now)
@@ -203,10 +236,10 @@ public class GameView extends View implements Runnable {
         }
     }
 
-    private boolean detectCollision(Rect a, Rect b) {
-        return Rect.intersects(a, b);
-        //return detectCollisionX(a,b) && detectCollisionY(a,b);
-    }
+//    private boolean detectCollision(Rect a, Rect b) {
+//        return Rect.intersects(a, b);
+//        //return detectCollisionX(a,b) && detectCollisionY(a,b);
+//    }
 
 //    private boolean detectCollisionX(Rect a, Rect b) {
 //        return (a.left >= b.left && a.left <= b.right) || (b.left >= a.left && b.left <= a.right);

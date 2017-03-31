@@ -13,9 +13,9 @@
 
     <ImageButton
         android:id="@+id/buttonSettingsGear"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:layout_gravity="bottom"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_gravity="right"
         android:background="@drawable/settings_gear" />
 
 </FrameLayout>

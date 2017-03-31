@@ -51,7 +51,8 @@ public class Player {
     private boolean moving = false;
 
     //Attached classes
-    Lights.Flashlight light;
+    Lights.Flashlight flashlight;
+    Lights selflight;
     private int radius;
     private int startingAngle;
     private int sweepingAngle;
@@ -65,23 +66,26 @@ public class Player {
         screenMinX = minX;
         screenMinY = minY;
         //Set current orientation to point northwards as default
-        Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.placeholder_player);
+        Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.avatar);
         image = Bitmap.createScaledBitmap(temp, tileWidth, tileHeight, true);
         this.imageWidth = image.getWidth();
         this.imageHeight = image.getHeight();
         //Set position
-        x = screenX / 2;
-        y = screenY / 2;
-        centerX = x + imageWidth / 2;
-        centerY = y + imageHeight / 2;
+//        x = screenX / 2;
+//        y = screenY / 2;
+//        centerX = x + imageWidth / 2;
+//        centerY = y + imageHeight / 2;
+        updateX(screenX/2);
+        updateY(screenY/2);
         hitBox = new Rect(x, y, x + imageWidth, y + imageHeight);
         screenMaxX = screenX - imageWidth;
         screenMaxY = screenY - imageHeight;
         //Create flashlight
-        radius = tileWidth * 4; //Is actually tileWidth * 8 of original view
-        startingAngle = 225;
-        sweepingAngle = 90;
-        light = new Lights.Flashlight(centerX, centerY, radius, startingAngle, sweepingAngle);
+        radius = tileWidth * 3; //Is actually tileWidth * 8 of original view
+        startingAngle = 242;
+        sweepingAngle = 51;
+        flashlight = new Lights.Flashlight(x + imageWidth/8, y + imageHeight/8, radius, startingAngle, sweepingAngle);
+        selflight = new Lights(centerX,centerY,imageHeight/2);
     }
 
     //Controls player location & flashlight radius
@@ -95,38 +99,44 @@ public class Player {
             temp[0] += directionX * speed;
             temp[1] += directionY * speed;
         }
-        //TODO: if doing battery, update radius of light here
+        //TODO: if doing battery, update radius of flashlight here
         return temp;
     }
 
     //Sets player location
     public void setLocation(int newX, int newY) {
-        x = newX - imageWidth/2;
-        y = newY - imageHeight/2;
+//        x = newX - imageWidth/2;
+//        y = newY - imageHeight/2;
+//        centerX = x + imageWidth / 2;
+//        centerY = y + imageHeight / 2;
+        updateX(newX - imageWidth/2);
+        updateY(newY - imageHeight/2);
 
         distance = calculateDistance(destinationX, destinationY);
         //Reached goal
         if(distance <= 50)
                 stopMoving();
         //Ensure player does not leave screen
-        if(x > screenMaxX)
-            x = screenMaxX;
-        else if(x < screenMinX)
-            x = screenMinX;
-        if(y > screenMaxY)
-            y = screenMaxY;
-        else if(y < screenMinY)
-            y = screenMinY;
 
-        centerX = x + imageWidth / 2;
-        centerY = y + imageHeight / 2;
+        if(x > screenMaxX)
+            updateX(screenMaxX); //x = screenMaxX;
+        else if(centerX < screenMinX)
+            updateX(screenMinX - imageWidth/2); //x = screenMinX - imageWidth/2;
+        if(y > screenMaxY)
+            updateY(screenMaxY); //y = screenMaxY;
+        else if(centerY < screenMinY)
+            updateY(screenMinY - imageHeight/2); //y = screenMinY - imageHeight/2;
+
+//        centerX = x + imageWidth / 2;
+//        centerY = y + imageHeight / 2;
 
         hitBox.left = x;
         hitBox.top = y;
         hitBox.right = x + imageWidth;
         hitBox.bottom = y + imageHeight;
 
-        light.setCircle(centerX, centerY, radius);
+        flashlight.setCircle(x + imageWidth/8, y + imageHeight/8, radius);
+        selflight.setCircle(centerX, centerY, imageHeight/2);
     }
 
     public void setDestination(int destX, int destY) {
@@ -139,6 +149,16 @@ public class Player {
 
     private double calculateDistance(int destX, int destY) {
         return Math.sqrt(Math.pow((destX - centerX), 2) + Math.pow((destY - centerY), 2));
+    }
+
+    private void updateX(int x) {
+        this.x = x;
+        centerX = x + imageWidth/2;
+    }
+
+    private void updateY(int y) {
+        this.y = y;
+        centerY = y + imageHeight/2;
     }
 
     public void startMoving() { moving = true; }
@@ -177,9 +197,9 @@ public class Player {
         return hitBox;
     }
 
-    public Lights.Flashlight getFlashLight() {
-        return light;
-    }
+    public Lights.Flashlight getFlashLight() { return flashlight; }
+
+    public Lights getSelfLight() {return selflight; }
 
     public boolean hasKey() {
         return hasKey;

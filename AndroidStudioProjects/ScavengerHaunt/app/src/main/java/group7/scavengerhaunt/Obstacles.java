@@ -63,7 +63,7 @@ public class Obstacles {
             hitBox = new Rect(x, y, x + image.getWidth(), y + image.getHeight() - GameView.tileHeight);
             hasLight = true;
             //Messy, hardcoded values
-            light = new Lights(x + image.getWidth()/2 - GameView.tileWidth / 3, y + image.getHeight()/2 - GameView.tileHeight / 2, GameView.tileWidth * 4);
+            light = new Lights(x + image.getWidth() * 44 / 100, y + image.getHeight() * 3 /10, GameView.tileWidth * 2);
         }
     }
 
@@ -94,7 +94,7 @@ public class Obstacles {
             p3[0] = (float)(x + image.getWidth());
             p3[1] = (float)(y + image.getHeight() + GameView.tileHeight);
             hasLight = true;
-            light = new Lights(x + image.getWidth() / 2, y + image.getHeight() / 2, GameView.tileWidth * scaleX);
+            light = new Lights(x + image.getWidth() * 3 / 5, y + image.getHeight() / 3, GameView.tileWidth * (scaleX * 2) / 3);
         }
 
         //Calculating Barycentric coordinates (flashbacks to computer graphics)
