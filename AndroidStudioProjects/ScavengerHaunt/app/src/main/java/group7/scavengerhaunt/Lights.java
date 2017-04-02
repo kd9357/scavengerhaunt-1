@@ -1,5 +1,9 @@
 package group7.scavengerhaunt;
 
+import android.graphics.BlurMaskFilter;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.RadialGradient;
 import android.graphics.RectF;
 
 /**
@@ -15,6 +19,10 @@ public class Lights {
         centerX = x;
         centerY = y;
         radius = r;
+    }
+
+    public void drawLight(Canvas canvas, Paint paint) {
+        canvas.drawCircle(getX(), getY(), getRadius(), paint);
     }
 
     public int getX() {
@@ -43,12 +51,18 @@ public class Lights {
         private int startingAngle;
         //Theta of the sector, where 90 produces quarter of a circle
         private int sweepingAngle;
+        Paint radialGradientPaint;      //Causes normal light to fade out
+        Paint radialColorPaint;         //Causes blurred yellow light from source
+        RadialGradient gradient;        //Radial gradient shader effect
 
         //x, y will correspond to player's center xy
         public Flashlight(int x, int y, int r, int startingAngle, int sweepingAngle) {
             super(x, y, r);
             this.startingAngle = startingAngle;
             this.sweepingAngle = sweepingAngle;
+            radialGradientPaint = new Paint();
+            radialColorPaint = new Paint();
+            radialColorPaint.setMaskFilter(new BlurMaskFilter(30, BlurMaskFilter.Blur.NORMAL));
             circle = new RectF();
             circle.set(x-r, y-r, x+r, y+r);
             largerCircle = new RectF();
@@ -61,6 +75,21 @@ public class Lights {
             this.centerX = x;
             this.centerY = y;
             this.radius = r;
+        }
+
+        public void drawLight(Canvas canvas, Paint paint) {
+            canvas.drawArc(getCircle(), getStartingAngle(), getSweepingAngle(), true, paint);
+            gradient = new RadialGradient(getX(), getY(), getRadius(),
+                    new int[] {0x00000000, 0xFF000000}, null, android.graphics.Shader.TileMode.CLAMP);
+            radialGradientPaint.setShader(gradient);
+            canvas.drawArc(getLargerCircle(), getStartingAngle(), getSweepingAngle(), true, radialGradientPaint);
+        }
+
+        public void drawColorLight(Canvas canvas) {
+            gradient = new RadialGradient(getX(), getY(), getRadius(),
+                    new int[] {0x64feece0, 0x00000000}, null, android.graphics.Shader.TileMode.CLAMP);
+            radialColorPaint.setShader(gradient);
+            canvas.drawArc(getCircle(), getStartingAngle(), getSweepingAngle(), true, radialColorPaint);
         }
 
         public void setStartingAngle(int theta) {

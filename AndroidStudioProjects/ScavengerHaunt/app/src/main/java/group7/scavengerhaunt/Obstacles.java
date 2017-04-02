@@ -3,6 +3,8 @@ package group7.scavengerhaunt;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.graphics.Rect;
 
 /**
@@ -28,6 +30,10 @@ public class Obstacles {
 
     public boolean detectCollision(int playerX, int playerY) {
         return playerX >= hitBox.left && playerX <= hitBox.right && playerY >= hitBox.top && playerY <= hitBox.bottom;
+    }
+
+    public void drawObstacle(Canvas canvas, Paint paint) {
+        canvas.drawBitmap(getImage(), getX(), getY(), paint);
     }
 
     public Bitmap getImage(){
@@ -72,6 +78,51 @@ public class Obstacles {
             super(context, x, y);
             Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.lounge_chair);
             image = Bitmap.createScaledBitmap(temp, GameView.tileWidth * scaleX, GameView.tileHeight * scaleY, true);
+            hitBox = new Rect(x, y, x + image.getWidth(), y + image.getHeight());
+        }
+    }
+
+    public static class Box extends Obstacles {
+        public Box(Context context, int x, int y, int scaleX, int scaleY) {
+            super(context, x, y);
+            Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.boxes);
+            image = Bitmap.createScaledBitmap(temp, GameView.tileWidth * scaleX, GameView.tileHeight * scaleY, true);
+            hitBox = new Rect(x, y, x + image.getWidth(), y + image.getHeight());
+        }
+    }
+
+    public static class SeatOne extends Obstacles {
+        public SeatOne(Context context, int x, int y, int scaleX, int scaleY) {
+            super(context, x, y);
+            Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.seat_1);
+            image = Bitmap.createScaledBitmap(temp, GameView.tileWidth * scaleX, GameView.tileHeight * scaleY, true);
+            hitBox = new Rect(x, y + image.getHeight() / 2, x + image.getWidth(), y + image.getHeight());
+        }
+    }
+
+    public static class SeatTwo extends Obstacles {
+        public SeatTwo(Context context, int x, int y, int scaleX, int scaleY) {
+            super(context, x, y);
+            Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.seat_2);
+            image = Bitmap.createScaledBitmap(temp, GameView.tileWidth * scaleX, GameView.tileHeight * scaleY, true);
+            hitBox = new Rect(x, y, x + 5 * image.getWidth() / 4, y + 5 * image.getHeight() / 4);
+        }
+    }
+
+    public static class SeatThree extends Obstacles {
+        public SeatThree(Context context, int x, int y, int scaleX, int scaleY) {
+            super(context, x, y);
+            Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.seat_3);
+            image = Bitmap.createScaledBitmap(temp, (int)(GameView.tileWidth * (scaleX + 0.5)), (int)(GameView.tileHeight * (scaleY + 0.6)), true);
+            hitBox = new Rect(x, y, x + image.getWidth(), y + 3 * image.getHeight() / 5);
+        }
+    }
+
+    public static class SeatFour extends Obstacles {
+        public SeatFour(Context context, int x, int y, int scaleX, int scaleY) {
+            super(context, x, y);
+            Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.seat_4);
+            image = Bitmap.createScaledBitmap(temp, GameView.tileWidth * scaleX, (int)(GameView.tileHeight * (scaleY + 0.5)), true);
             hitBox = new Rect(x, y, x + image.getWidth(), y + image.getHeight());
         }
     }

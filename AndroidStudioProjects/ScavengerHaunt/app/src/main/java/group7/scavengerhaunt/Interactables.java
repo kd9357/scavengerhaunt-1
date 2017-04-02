@@ -3,6 +3,8 @@ package group7.scavengerhaunt;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.graphics.Rect;
 
 /**
@@ -21,6 +23,9 @@ public class Interactables {
         this.y = y;
     }
 
+    public void drawInteractable(Canvas canvas, Paint paint) {
+        canvas.drawBitmap(getImage(), getX(), getY(), paint);
+    }
     public Bitmap getImage(){
         return image;
     }
