@@ -184,12 +184,13 @@ public class GameView extends View implements Runnable {
             if(o.detectCollision(player.getCenterX(), newCoords[1]))
                 newY = player.getCenterY();
         }
-        player.setLocation(newX,newY);
+        if(newX != player.getCenterX() || newY != player.getCenterY())
+            player.setLocation(newX,newY);
 
         //Update enemy location & detect collision
         for(Enemies e : enemyList) {
             e.update();
-            if(e.detectCollision(player.getHitBox())) {
+            if(e.detectCollision(player.getCenterX(), player.getCenterY())) {
                 playing = false;
                 gameFinished = true;
                 gameWon = false;
@@ -238,6 +239,7 @@ public class GameView extends View implements Runnable {
             }
 
             //Draw player below lights (for now)
+            //Drawing underneath lights disguises some lag of the flashlight
             canvas.save();
             canvas.rotate((float) player.getAngleDegrees(), player.getCenterX(), player.getCenterY());
             canvas.drawBitmap(player.getImage(), player.getX(), player.getY(), paint);
@@ -278,6 +280,7 @@ public class GameView extends View implements Runnable {
             if(!MainActivity.mDebugModeOn)
                 canvas.drawBitmap(darknessBitmap, 0, 0, paint);
 
+
             //Draw HUD
             if(player.hasKey()) {
                 canvas.drawBitmap(key.getImage(), 0, 0, paint);
@@ -298,7 +301,7 @@ public class GameView extends View implements Runnable {
     //Need to optimize, 30fps is getting harder to achieve
     private void controlFrameRate() {
         try {
-            gameThread.sleep(35);
+            gameThread.sleep(33);
         }
         catch (InterruptedException e) {
             e.printStackTrace();

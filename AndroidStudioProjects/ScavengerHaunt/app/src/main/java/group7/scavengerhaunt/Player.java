@@ -88,17 +88,17 @@ public class Player {
 
     //Controls player location & flashlight radius
     public int[] update() {
-        int[] temp = {this.centerX, this.centerY};
+        int[] coords = {this.centerX, this.centerY};
         if(moving) {
             //Set orientation
             angleDegrees = (float) GameActivity.getAngle(directionX, directionY);
             if(directionX < 0)
                 angleDegrees = -angleDegrees;
-            temp[0] += directionX * speed;
-            temp[1] += directionY * speed;
+            coords[0] += directionX * speed;
+            coords[1] += directionY * speed;
         }
         //TODO: if doing battery, update radius of flashlight here
-        return temp;
+        return coords;
     }
 
     //Sets player location
@@ -121,11 +121,7 @@ public class Player {
         else if(centerY < screenMinY)
             updateY(screenMinY - imageHeight/2);
 
-        hitBox.left = x;
-        hitBox.top = y;
-        hitBox.right = x + imageWidth;
-        hitBox.bottom = y + imageHeight;
-
+        hitBox.offsetTo(x, y);
         flashlight.setCircle(x + imageWidth/8, y + imageHeight/8, radius);
         selflight.setCircle(centerX, centerY, imageHeight/2);
     }
@@ -196,6 +192,7 @@ public class Player {
     public Rect getHitBox() {
         return hitBox;
     }
+
 
     public Lights.Flashlight getFlashLight() { return flashlight; }
 

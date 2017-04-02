@@ -46,7 +46,7 @@ public class Lights {
     public static class Flashlight extends Lights{
         //The base Circle with given radius. The light will be a sector of this
         private RectF circle;
-        private RectF largerCircle;
+        private int largerRadius;
         //Where the arc starts, where 270 is straight ahead
         private int startingAngle;
         //Theta of the sector, where 90 produces quarter of a circle
@@ -65,13 +65,11 @@ public class Lights {
             radialColorPaint.setMaskFilter(new BlurMaskFilter(30, BlurMaskFilter.Blur.NORMAL));
             circle = new RectF();
             circle.set(x-r, y-r, x+r, y+r);
-            largerCircle = new RectF();
-            largerCircle.set(x - (r + r/10), y-(r + r/10), x+(r + r/10), y+(r + r/10));
+            largerRadius = radius + radius / 7;
         }
 
         public void setCircle(int x, int y, int r) {
             circle.set(x-r, y-r, x+r, y+r);
-            largerCircle.set(x - (r + r/10), y-(r + r/10), x+(r + r/10), y+(r + r/10));
             this.centerX = x;
             this.centerY = y;
             this.radius = r;
@@ -82,7 +80,7 @@ public class Lights {
             gradient = new RadialGradient(getX(), getY(), getRadius(),
                     new int[] {0x00000000, 0xFF000000}, null, android.graphics.Shader.TileMode.CLAMP);
             radialGradientPaint.setShader(gradient);
-            canvas.drawArc(getLargerCircle(), getStartingAngle(), getSweepingAngle(), true, radialGradientPaint);
+            canvas.drawCircle(getX(), getY(), largerRadius, radialGradientPaint);
         }
 
         public void drawColorLight(Canvas canvas) {
@@ -103,8 +101,6 @@ public class Lights {
         public RectF getCircle() {
             return circle;
         }
-
-        public RectF getLargerCircle() { return largerCircle;};
 
         public int getStartingAngle() {
             return startingAngle;
