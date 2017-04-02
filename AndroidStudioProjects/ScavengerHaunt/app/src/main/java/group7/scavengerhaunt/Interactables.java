@@ -51,7 +51,7 @@ public class Interactables {
             super(context, x, y);
             Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.door);
             image = Bitmap.createScaledBitmap(temp, tileWidth, tileHeight * 2, true);
-            hitBox = new Rect(x, y, x + image.getWidth() + image.getWidth() + 4, y + image.getHeight());
+            hitBox = new Rect(x, y, x  + (int)(1.5 * image.getWidth()), y + image.getHeight());
         }
 
     }

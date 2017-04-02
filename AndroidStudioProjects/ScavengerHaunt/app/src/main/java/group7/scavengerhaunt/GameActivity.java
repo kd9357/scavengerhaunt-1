@@ -1,5 +1,6 @@
 package group7.scavengerhaunt;
 
+import android.app.FragmentManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Point;
@@ -37,12 +38,19 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         //SurfaceView
         gameView = (GameView) findViewById(R.id.game_view);
         //Eventually, initialize will have more parameters for spawn locations etc
-        gameView.initialize(size.x, size.y);
+        gameView.initialize(this, size.x, size.y);
 
         buttonSettingsGear = (ImageButton) findViewById(R.id.buttonSettingsGear);
         buttonSettingsGear.setOnClickListener(this);
 
         setInstanceVarsFromSharedPrefs();
+    }
+
+    // Dialog fragment for when user wins / loses
+    protected void handleEndGame() {
+        FragmentManager fm = getFragmentManager();
+        EndGameFragment f = new EndGameFragment();
+        f.show(fm, "end");
     }
 
     //Pause activity

@@ -1,5 +1,6 @@
 package group7.scavengerhaunt;
 
+import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -48,6 +49,8 @@ public class GameView extends View implements Runnable {
     //Static images
     private Bitmap background;
     private Bitmap wall;
+    private Bitmap escaped;
+    private Bitmap captured;
 
     //Game Objects
     private Player player;
@@ -60,12 +63,15 @@ public class GameView extends View implements Runnable {
     private Paint paint;
     private Paint transparentPaint;
     private Paint normalLightsPaint;
+    private Paint radialGradientPaint;
     private Canvas darkness;
     private Bitmap darknessBitmap;
 
     //Determines the text of the dialog fragment
     private boolean gameWon = false;
     private boolean gameFinished = false;
+
+    private GameActivity g;
 
     Context context;
 
@@ -74,7 +80,9 @@ public class GameView extends View implements Runnable {
         this.context = context;
     }
 
-    public void initialize(int screenX, int screenY) {
+    public void initialize(GameActivity g, int screenX, int screenY) {
+        this.g = g;
+
         screenMaxX = screenX;
         screenMaxY = screenY;
         tileWidth = screenX / NUM_COLUMNS;
@@ -90,14 +98,23 @@ public class GameView extends View implements Runnable {
         transparentPaint.setColor(Color.TRANSPARENT);
         transparentPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
 
-        normalLightsPaint = new Paint();
+        normalLightsPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         normalLightsPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_OUT));
         normalLightsPaint.setColor(Color.TRANSPARENT);
         normalLightsPaint.setMaskFilter(new BlurMaskFilter(60, BlurMaskFilter.Blur.NORMAL));
 
+        radialGradientPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+
         //Create our background and decorations
         Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.floorboard);
         background = Bitmap.createScaledBitmap(temp, screenX, screenY, true);
+        temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.escaped);
+        escaped = Bitmap.createScaledBitmap(temp, screenX - tileWidth * 3, screenY - tileHeight * 3, true);
+        temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.captured);
+        captured = Bitmap.createScaledBitmap(temp, screenX - tileWidth * 3, screenY - tileHeight *3, true);
+
+
+
         temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.wall);
         wall = Bitmap.createScaledBitmap(temp, tileWidth * 2, screenY, true);
         //Create player
@@ -110,11 +127,11 @@ public class GameView extends View implements Runnable {
         obstacleList.add(new Obstacles.LoungeChair(context, tileWidth * 16, tileHeight * 8, 4, 4));
         obstacleList.add(new Obstacles.Fireplace(context, tileWidth *15, 0, 6, 5));
         //Create our lights
-        lightList.add(player.getSelfLight());
         for(Obstacles o : obstacleList) {
             if(o.hasLight())
                 lightList.add(o.getLight());
         }
+        lightList.add(player.getSelfLight());
     }
 
     @Override
@@ -125,6 +142,7 @@ public class GameView extends View implements Runnable {
             postInvalidate();
             controlFrameRate();
         }
+        // handleEndGame
     }
 
     public void update() {
@@ -171,39 +189,23 @@ public class GameView extends View implements Runnable {
             for (Obstacles o : obstacleList)
                 canvas.drawBitmap(o.getImage(), o.getX(), o.getY(), paint);
 
-            //Draw other lights
+            //Draw Lights
             darkness.drawRect(0, 0, screenMaxX, screenMaxY, paint);
-            for(Lights l : lightList) {
-                darkness.drawCircle(l.getX(), l.getY(), l.getRadius(), normalLightsPaint);
-            }
-            //If using multiple bands
-//            Paint p = new Paint();
-//            p.setAlpha(80);
-//            darkness.drawRect(0, 0, screenMaxX, screenMaxY, p);
-            //paint.setAlpha(100);
-//            for(Lights l : lightList) {
-//                darkness.drawCircle(l.getX(), l.getY(), l.getRadius() - l.getRadius() / 3, transparentPaint);
-//            }
-//            darkness.drawRect(0, 0, screenMaxX, screenMaxY, p);
-//            for(Lights l : lightList) {
-//                darkness.drawCircle(l.getX(), l.getY(), l.getRadius() - 2 * l.getRadius() / 3, transparentPaint);
-//            }
             //Draw Flashlight
             darkness.save();
             darkness.rotate((float) player.getAngleDegrees(), player.getCenterX(), player.getCenterY());
             Lights.Flashlight f = player.getFlashLight();
             darkness.drawArc(f.getCircle(), f.getStartingAngle(), f.getSweepingAngle(), true, transparentPaint);
-            darkness.drawArc(f.getCircle(), f.getStartingAngle(), f.getSweepingAngle(), true, normalLightsPaint);
-//            RadialGradient gradient = new RadialGradient(f.getX(), f.getY(), f.getRadius() + 1,
-//                    new int[] {0x00000000, 0xFF000000}, null, android.graphics.Shader.TileMode.CLAMP);
-//            Paint p = new Paint();
-            //p.setColor(Color.TRANSPARENT);
-//            p.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_OUT));
-//            p.setShader(gradient);
-            //darkness.drawArc(f.getCircle(), f.getStartingAngle(), f.getSweepingAngle(), true, p);
+            RadialGradient gradient = new RadialGradient(f.getX(), f.getY(), f.getRadius(),
+                    new int[] {0x00000000, 0xFF000000}, null, android.graphics.Shader.TileMode.CLAMP);
+            radialGradientPaint.setShader(gradient);
+            darkness.drawArc(f.getLargerCircle(), f.getStartingAngle() - 30, f.getSweepingAngle() + 30, true, radialGradientPaint);
             darkness.restore();
-
-            //Draws the shadows
+            //Draw other lights
+            for(Lights l : lightList) {
+                darkness.drawCircle(l.getX(), l.getY(), l.getRadius(), normalLightsPaint);
+            }
+            //Draws shadows and lights onto canvas
             canvas.drawBitmap(darknessBitmap, 0, 0, paint);
             
             //Draw player over lights (for now)
@@ -211,18 +213,25 @@ public class GameView extends View implements Runnable {
             canvas.rotate((float) player.getAngleDegrees(), player.getCenterX(), player.getCenterY());
             canvas.drawBitmap(player.getImage(), player.getX(), player.getY(), paint);
             canvas.restore();
+
+            //Draw HUD
+            if(player.hasKey()) {
+                canvas.drawBitmap(key.getImage(), 0, 0, paint);
+            }
         }
         //Handle endgame (to be removed and replaced with dialog fragment)
         else {
-            canvas.drawColor(Color.WHITE);
-            paint.setColor(Color.BLACK);
-            paint.setTextSize(200);
-            if(gameWon)
-                canvas.drawText("You won!", 0, 8, 0, (float)canvas.getHeight()/2, paint);
+
+            if (gameWon)
+                canvas.drawBitmap(escaped, (int) (tileWidth * 1.5), (int) (tileHeight * 1.5), paint);
             else
-                canvas.drawText("You died!", 0, 9, 0, (float)canvas.getHeight()/2, paint);
+                canvas.drawBitmap(captured, (int) (tileWidth * 1.5), (int) (tileHeight * 1.5), paint);
+
+
         }
 }
+
+
 
     //This supposedly makes the game run at a steady 60fps
     //TODO: modify the length of sleep to maintain steady fps
@@ -277,6 +286,13 @@ public class GameView extends View implements Runnable {
             //Screen is touched, face in destination direction
             //If held down, move in that direction as well
             case MotionEvent.ACTION_DOWN:
+                if (gameFinished) {
+                    if (motionEvent.getX() > screenMaxX - tileWidth * 6 && motionEvent.getX() < screenMaxX - tileWidth) {
+                        if (motionEvent.getY() > screenMaxY - tileHeight * 5 && motionEvent.getY() < screenMaxY - tileHeight) {
+                            g.finish();
+                        }
+                    }
+                }
                 player.setDestination((int) motionEvent.getX(), (int) motionEvent.getY());
                 player.startMoving();
                 break;
