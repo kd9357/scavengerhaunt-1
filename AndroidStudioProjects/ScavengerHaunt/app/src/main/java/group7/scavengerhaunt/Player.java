@@ -108,7 +108,7 @@ public class Player {
 
         distance = calculateDistance(destinationX, destinationY);
         //Reached goal
-        if(distance <= 50)
+        if(distance <= 20)
                 stopMoving();
 
         //Ensure player does not leave screen

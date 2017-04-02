@@ -72,6 +72,7 @@ public class GameView extends View implements Runnable {
     private Paint paint;                //Draws images
     private Paint transparentPaint;     //Draws flashlight
     private Paint normalLightsPaint;    //Draws other lights
+    private Paint hitBoxPaint;
     private Canvas darkness;
     private Bitmap darknessBitmap;
 
@@ -107,8 +108,13 @@ public class GameView extends View implements Runnable {
         normalLightsPaint.setColor(Color.TRANSPARENT);
         normalLightsPaint.setMaskFilter(new BlurMaskFilter(60, BlurMaskFilter.Blur.NORMAL));
 
+        hitBoxPaint = new Paint();
+        hitBoxPaint.setStyle(Paint.Style.STROKE);
+        hitBoxPaint.setColor(Color.GREEN);
+
         //Create our background and decorations
-        Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.floorboard);
+        //Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.floorboard);
+        Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.background_full);
         background = Bitmap.createScaledBitmap(temp, screenX, screenY, true);
         temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.wall);
         wall = Bitmap.createScaledBitmap(temp, tileWidth * 2, screenY, true);
@@ -132,10 +138,10 @@ public class GameView extends View implements Runnable {
         door = new Interactables.Door(context, 0, tileHeight, tileWidth * 2, tileHeight * 2);
         key = new Interactables.Key(context, (int)(tileWidth * 2.5), tileHeight * 10, tileWidth, tileHeight);
         //Create our obstacles
-        obstacleList.add(new Obstacles.SeatTwo(context, (int)(tileWidth * 7.2), (int)(tileHeight * 5.7), 2, 3));
-        obstacleList.add(new Obstacles.SeatThree(context, (int)(tileWidth * 3.8), (int)(tileHeight * 8.7), 2, 2));
-        obstacleList.add(new Obstacles.SeatFour(context, tileWidth * 2, (int)(tileHeight * 5.2), 2, 2));
-        obstacleList.add(new Obstacles.Table(context, tileWidth * 3, tileHeight *  5, 5, 5));
+        //obstacleList.add(new Obstacles.SeatTwo(context, (int)(tileWidth * 7.2), (int)(tileHeight * 5.7), 2, 3));
+        //obstacleList.add(new Obstacles.SeatThree(context, (int)(tileWidth * 3.8), (int)(tileHeight * 8.7), 2, 2));
+        //obstacleList.add(new Obstacles.SeatFour(context, tileWidth * 2, (int)(tileHeight * 5.2), 2, 2));
+        obstacleList.add(new Obstacles.Table(context, tileWidth * 2, tileHeight *  4, 7, 7));
         obstacleList.add(new Obstacles.LoungeChair(context, tileWidth * 16, tileHeight * 8, 4, 4));
         obstacleList.add(new Obstacles.Box(context, tileWidth * 3, 0, 3, 2));
         obstacleList.add(new Obstacles.Fireplace(context, tileWidth *15, 0, 6, 5));
@@ -149,6 +155,9 @@ public class GameView extends View implements Runnable {
                 lightList.add(o.getLight());
         }
         lightList.add(player.getSelfLight());
+
+//        debugMode = true;
+
     }
 
     @Override
@@ -206,25 +215,35 @@ public class GameView extends View implements Runnable {
         if(!gameFinished) {
             //Draw background
             canvas.drawBitmap(background, 0, 0, paint);
-            canvas.drawBitmap(wall, 0, 0, paint);
+            //canvas.drawBitmap(wall, 0, 0, paint);
 
-            canvas.drawBitmap(bear, tileWidth * 12, tileHeight * 2, paint);
-            canvas.drawBitmap(papers, tileWidth * 15, tileHeight * 9, paint);
-            canvas.drawBitmap(bottle, tileWidth * 15, tileHeight * 10, paint);
+            //canvas.drawBitmap(bear, tileWidth * 12, tileHeight * 2, paint);
+            //canvas.drawBitmap(papers, tileWidth * 15, tileHeight * 9, paint);
+            //canvas.drawBitmap(bottle, tileWidth * 15, tileHeight * 10, paint);
 
             //Draw interactables
-            if(!player.hasKey())
+            if(!player.hasKey()) {
                 key.drawInteractable(canvas, paint);
+                if(MainActivity.mDebugModeOn)
+                    key.drawHitBox(canvas, hitBoxPaint);
+            }
             door.drawInteractable(canvas, paint);
+            if(MainActivity.mDebugModeOn)
+                door.drawHitBox(canvas, hitBoxPaint);
             //Draw obstacles
-            for (Obstacles o : obstacleList)
+            for (Obstacles o : obstacleList) {
                 o.drawObstacle(canvas, paint);
+                if(MainActivity.mDebugModeOn)
+                    o.drawHitBox(canvas, hitBoxPaint);
+            }
 
             //Draw player below lights (for now)
             canvas.save();
             canvas.rotate((float) player.getAngleDegrees(), player.getCenterX(), player.getCenterY());
             canvas.drawBitmap(player.getImage(), player.getX(), player.getY(), paint);
             canvas.restore();
+            if(MainActivity.mDebugModeOn)
+                canvas.drawRect(player.getHitBox(), hitBoxPaint);
 
             //Draw enemies
             for(Enemies e : enemyList) {
@@ -232,6 +251,8 @@ public class GameView extends View implements Runnable {
                 canvas.rotate((float) e.getAngleDegrees(), e.getCenterX(), e.getCenterY());
                 e.drawEnemy(canvas, paint);
                 canvas.restore();
+                if(MainActivity.mDebugModeOn)
+                    e.drawHitBox(canvas, hitBoxPaint);
             }
 
             //Draw Lights
@@ -243,14 +264,19 @@ public class GameView extends View implements Runnable {
             f.drawLight(darkness, transparentPaint);
             darkness.restore();
             //Draw other lights
-            for(Lights l : lightList)
+            for(Lights l : lightList) {
                 l.drawLight(darkness, normalLightsPaint);
+                if(MainActivity.mDebugModeOn)
+                    l.drawLight(canvas, hitBoxPaint);
+            }
+            //Draw flashlight color over other lights
             darkness.save();
             darkness.rotate((float) player.getAngleDegrees(), player.getCenterX(), player.getCenterY());
             f.drawColorLight(darkness);
             darkness.restore();
             //Draws shadows and lights onto canvas
-            canvas.drawBitmap(darknessBitmap, 0, 0, paint);
+            if(!MainActivity.mDebugModeOn)
+                canvas.drawBitmap(darknessBitmap, 0, 0, paint);
 
             //Draw HUD
             if(player.hasKey()) {
@@ -272,7 +298,7 @@ public class GameView extends View implements Runnable {
     //Need to optimize, 30fps is getting harder to achieve
     private void controlFrameRate() {
         try {
-            gameThread.sleep(30);
+            gameThread.sleep(35);
         }
         catch (InterruptedException e) {
             e.printStackTrace();

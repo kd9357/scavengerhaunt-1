@@ -52,6 +52,10 @@ public class Enemies {
         canvas.drawBitmap(getImage(), getX(), getY(), paint);
     }
 
+    public void drawHitBox(Canvas canvas, Paint paint) {
+        canvas.drawRect(hitBox, paint);
+    }
+
     public void update() {
         if(moving) {
             setX(directionX * speed);
@@ -115,7 +119,7 @@ public class Enemies {
             this.imageHeight = image.getHeight();
             centerX = x + image.getWidth()/2;
             centerY = y + image.getHeight()/2;
-            hitBox = new Rect(x, y, imageWidth, imageHeight);
+            hitBox = new Rect(x + imageWidth / 4, y + imageHeight / 4, x + 3 *imageWidth / 4, y + 3 * imageHeight / 4);
             setDirection(-1, 0);
             patrolRoute = GameView.tileWidth * 7;
             moving = true;
@@ -126,10 +130,10 @@ public class Enemies {
             if(moving) {
                 setX(x + directionX * speed);
                 //setY(directionY * speed);
-                hitBox.left = x;
-                hitBox.top = y;
-                hitBox.right = x + imageWidth;
-                hitBox.bottom = y + imageHeight;
+                hitBox.left = x + imageWidth / 4;
+                hitBox.top = y + imageHeight / 4;
+                hitBox.right = x + 3 * imageWidth / 4;
+                hitBox.bottom = y + 3 * imageHeight / 4;
                 distanceTraveled += Math.abs(directionX * speed);
                 if(distanceTraveled >= patrolRoute) {
                     setDirection(-directionX, directionY);

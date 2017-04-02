@@ -23,9 +23,6 @@ public class SettingsActivity extends AppCompatActivity {
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
-            getPreferenceManager().setSharedPreferencesName("ScavengerHaunt");
-            SharedPreferences sharedPrefs =
-                    getActivity().getSharedPreferences("ScavengerHaunt", MODE_PRIVATE);
             addPreferencesFromResource(R.xml.preferences);
         }
     }

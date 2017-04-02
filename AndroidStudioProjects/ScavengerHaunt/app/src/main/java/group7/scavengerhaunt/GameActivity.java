@@ -4,11 +4,11 @@ import android.app.FragmentManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Point;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Display;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageButton;
 
@@ -80,14 +80,18 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         //Called when Settings has been exited
         if(requestCode == SETTINGS_REQUEST) {
-            SharedPreferences sharedPref = getPreferences(MODE_PRIVATE);
+            //SharedPreferences sharedPref = getPreferences(MODE_PRIVATE);
+            SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
             MainActivity.mSoundOn = sharedPref.getBoolean("sound", true);
+            MainActivity.mDebugModeOn = sharedPref.getBoolean("debug", false);
         }
     }
 
     private void setInstanceVarsFromSharedPrefs() {
-        SharedPreferences sharedPref = getPreferences(MODE_PRIVATE);
+        //SharedPreferences sharedPref = getPreferences(MODE_PRIVATE);
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         MainActivity.mSoundOn = sharedPref.getBoolean("sound", true);
+        MainActivity.mDebugModeOn = sharedPref.getBoolean("debug", false);
     }
 
     @Override

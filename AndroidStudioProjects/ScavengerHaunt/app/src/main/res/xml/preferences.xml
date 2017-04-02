@@ -5,4 +5,10 @@
         android:title="@string/sound_title"
         android:defaultValue="true"
         android:summary="@string/sound_summary"/>
+    <CheckBoxPreference
+        android:key="debug"
+        android:title="Enable debug mode"
+        android:defaultValue="false"
+        android:summary="Turn off shadows and make collision boxes visible"/>
+
 </PreferenceScreen>

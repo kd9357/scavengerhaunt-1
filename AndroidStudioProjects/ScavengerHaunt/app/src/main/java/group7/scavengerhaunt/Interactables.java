@@ -26,6 +26,11 @@ public class Interactables {
     public void drawInteractable(Canvas canvas, Paint paint) {
         canvas.drawBitmap(getImage(), getX(), getY(), paint);
     }
+
+    public void drawHitBox(Canvas canvas, Paint paint) {
+        canvas.drawRect(hitBox, paint);
+    }
+
     public Bitmap getImage(){
         return image;
     }
@@ -56,7 +61,7 @@ public class Interactables {
             super(context, x, y);
             Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.door);
             image = Bitmap.createScaledBitmap(temp, tileWidth, tileHeight * 2, true);
-            hitBox = new Rect(x, y, x  + (int)(1.5 * image.getWidth()), y + image.getHeight());
+            hitBox = new Rect(x + 2 * image.getWidth() / 3, y + image.getHeight()/3, x  + (int)(1.5 * image.getWidth()), y + image.getHeight());
         }
 
     }
@@ -71,7 +76,7 @@ public class Interactables {
             super(context, x, y);
             Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.key);
             image = Bitmap.createScaledBitmap(temp, tileWidth, tileHeight, true);
-            hitBox = new Rect(x, y, x + image.getWidth(), y + image.getHeight());
+            hitBox = new Rect(x + image.getWidth()/4, y, x + 3 *image.getWidth()/4, y + image.getHeight());
         }
     }
 }

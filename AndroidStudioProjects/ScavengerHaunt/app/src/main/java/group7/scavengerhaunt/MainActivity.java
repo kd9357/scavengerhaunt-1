@@ -18,6 +18,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private int SETTINGS_REQUEST = 1;
 
     public static boolean mSoundOn = true;
+    public static boolean mDebugModeOn = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,12 +86,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if(requestCode == SETTINGS_REQUEST) {
             SharedPreferences sharedPref = getPreferences(MODE_PRIVATE);
             mSoundOn = sharedPref.getBoolean("sound", true);
+            mDebugModeOn = sharedPref.getBoolean("debug", false);
         }
     }
 
     private void setInstanceVarsFromSharedPrefs() {
         SharedPreferences sharedPref = getPreferences(MODE_PRIVATE);
         mSoundOn = sharedPref.getBoolean("sound", true);
+        mDebugModeOn = sharedPref.getBoolean("debug", false);
     }
 
 

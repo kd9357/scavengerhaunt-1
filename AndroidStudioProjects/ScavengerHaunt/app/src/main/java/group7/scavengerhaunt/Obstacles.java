@@ -7,6 +7,9 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by Kevin on 3/28/2017.
  */
@@ -36,6 +39,10 @@ public class Obstacles {
         canvas.drawBitmap(getImage(), getX(), getY(), paint);
     }
 
+    public void drawHitBox(Canvas canvas, Paint paint) {
+        canvas.drawRect(hitBox, paint);
+    }
+
     public Bitmap getImage(){
         return image;
     }
@@ -61,15 +68,35 @@ public class Obstacles {
     }
 
     public static class Table extends Obstacles {
-        //Hardcoded to be one tile shorter (-y) than normal
+        List<Rect> hitBoxes = new ArrayList<>();
         public Table(Context context, int x, int y, int scaleX, int scaleY) {
             super(context, x, y);
-            Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.table);
+            //Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.table);
+            Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.table_full);
             image = Bitmap.createScaledBitmap(temp, GameView.tileWidth * scaleX, GameView.tileHeight * scaleY, true);
-            hitBox = new Rect(x, y, x + image.getWidth(), y + image.getHeight() - GameView.tileHeight);
+            //hitBox = new Rect(x, y, x + image.getWidth(), y + image.getHeight() - GameView.tileHeight);
+            //hitBoxes.add(new Rect(x, y, x + image.getWidth(), y + image.getHeight() - GameView.tileHeight));
+            hitBoxes.add(new Rect(x + image.getWidth() / 7, y + image.getHeight() / 6, x + 6 *image.getWidth() / 7, y + 3 * image.getHeight() / 4));
+            hitBoxes.add(new Rect(x, y + image.getHeight() / 6, x + image.getWidth() / 6, y + image.getHeight()/2 ));
+            hitBoxes.add(new Rect(x + image.getWidth()/ 3, y + 2*image.getHeight()/3, x + 4 *image.getWidth()/7, y + 5 *image.getHeight() / 6));
+            hitBoxes.add(new Rect(x + 5 *image.getWidth()/6, y + image.getHeight() / 6, x + image.getWidth(), y + 4 * image.getHeight() / 7));
             hasLight = true;
             //Messy, hardcoded values
-            light = new Lights(x + image.getWidth() * 44 / 100, y + image.getHeight() * 3 /10, GameView.tileWidth * 2);
+            light = new Lights(x + image.getWidth() * 47 / 100, y + image.getHeight() * 35 /100, GameView.tileWidth * 2);
+        }
+
+        public boolean detectCollision(int playerX, int playerY) {
+            for (Rect hitBox : hitBoxes) {
+                if (playerX >= hitBox.left && playerX <= hitBox.right && playerY >= hitBox.top && playerY <= hitBox.bottom)
+                    return true;
+            }
+            return false;
+        }
+
+        public void drawHitBox(Canvas canvas, Paint paint) {
+            for(Rect hitBox : hitBoxes) {
+                canvas.drawRect(hitBox, paint);
+            }
         }
     }
 
@@ -136,6 +163,7 @@ public class Obstacles {
         //Right now we're hardcoding the hitbox to be tile wider (to the left) and lower than normal
         public Fireplace(Context context, int x, int y, int scaleX, int scaleY) {
             super(context, x, y);
+            hitBox = new Rect();
             Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.fireplace_complete);
             image = Bitmap.createScaledBitmap(temp, GameView.tileWidth * scaleX, GameView.tileHeight * scaleY, true);
             p1[0] = (float)x - GameView.tileWidth;
