@@ -2,9 +2,12 @@ package group7.scavengerhaunt;
 
 import android.graphics.BlurMaskFilter;
 import android.graphics.Canvas;
+import android.graphics.LinearGradient;
 import android.graphics.Paint;
 import android.graphics.RadialGradient;
+import android.graphics.Rect;
 import android.graphics.RectF;
+import android.util.Log;
 
 /**
  * Created by Kevin on 3/30/2017.
@@ -23,6 +26,17 @@ public class Lights {
 
     public void drawLight(Canvas canvas, Paint paint) {
         canvas.drawCircle(getX(), getY(), getRadius(), paint);
+    }
+
+    public boolean detectCollision(Rect obj) {
+        //Case 1: if the center is inside the rectangle
+        if(obj.contains(centerX, centerY))
+            return true;
+        //If it's not that easy, check point of rectangle closest to circle
+        int xStar = Math.min(Math.max(centerX, obj.left), obj.right);
+        int yStar = Math.min(Math.max(centerY, obj.top), obj.bottom);
+        double dist = GameActivity.calculateDistance(centerX, centerY, xStar, yStar);
+        return dist <= radius;
     }
 
     public int getX() {
@@ -88,6 +102,17 @@ public class Lights {
                     new int[] {0x64feece0, 0x00000000}, null, android.graphics.Shader.TileMode.CLAMP);
             radialColorPaint.setShader(gradient);
             canvas.drawArc(getCircle(), getStartingAngle(), getSweepingAngle(), true, radialColorPaint);
+        }
+
+        public boolean detectCollision(Rect obj) {
+            //Case 1: if the center is inside the rectangle
+            if(obj.contains(centerX, centerY))
+                return true;
+            //If it's not that easy, check point of rectangle closest to circle
+            int xStar = Math.min(Math.max(centerX, obj.left), obj.right);
+            int yStar = Math.min(Math.max(centerY, obj.top), obj.bottom);
+            double dist = GameActivity.calculateDistance(centerX, centerY, xStar, yStar);
+            return dist <= largerRadius;
         }
 
         public void setStartingAngle(int theta) {

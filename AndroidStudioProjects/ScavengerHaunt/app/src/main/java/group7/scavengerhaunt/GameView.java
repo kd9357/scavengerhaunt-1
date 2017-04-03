@@ -41,6 +41,8 @@ public class GameView extends View implements Runnable {
     public static int tileWidth;
     public static int tileHeight;
 
+    private int screenMinX;
+    private int screenMinY;
     private int screenMaxX;
     private int screenMaxY;
 
@@ -52,10 +54,6 @@ public class GameView extends View implements Runnable {
 
     //Static images
     private Bitmap background;
-    private Bitmap wall;
-    private Bitmap bear;
-    private Bitmap papers;
-    private Bitmap bottle;
 
     private Bitmap escaped;
     private Bitmap captured;
@@ -89,10 +87,12 @@ public class GameView extends View implements Runnable {
 
     public void initialize(GameActivity g, int screenX, int screenY) {
         this.gameActivity = g;
-        screenMaxX = screenX;
-        screenMaxY = screenY;
         tileWidth = screenX / NUM_COLUMNS;
         tileHeight = screenY / NUM_ROWS;
+        screenMinX = tileWidth * 2;
+        screenMinY = 0;
+        screenMaxX = screenX;
+        screenMaxY = screenY;
         paint = new Paint(Paint.ANTI_ALIAS_FLAG);
         paint.setColor(Color.BLACK);
 
@@ -106,24 +106,15 @@ public class GameView extends View implements Runnable {
         normalLightsPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         normalLightsPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_OUT));
         normalLightsPaint.setColor(Color.TRANSPARENT);
-        normalLightsPaint.setMaskFilter(new BlurMaskFilter(60, BlurMaskFilter.Blur.NORMAL));
+        normalLightsPaint.setMaskFilter(new BlurMaskFilter(50, BlurMaskFilter.Blur.NORMAL));
 
         hitBoxPaint = new Paint();
         hitBoxPaint.setStyle(Paint.Style.STROKE);
         hitBoxPaint.setColor(Color.GREEN);
 
         //Create our background and decorations
-        //Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.floorboard);
         Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.background_full);
         background = Bitmap.createScaledBitmap(temp, screenX, screenY, true);
-        temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.wall);
-        wall = Bitmap.createScaledBitmap(temp, tileWidth * 2, screenY, true);
-        temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.bear);
-        bear = Bitmap.createScaledBitmap(temp, tileWidth * 5, tileHeight * 5, true);
-        temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.papers_ground);
-        papers = Bitmap.createScaledBitmap(temp, tileWidth * 2, tileHeight * 2, true);
-        temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.liquor);
-        bottle = Bitmap.createScaledBitmap(temp, tileWidth, tileHeight, true);
 
         //End Game drawables
         temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.escaped);
@@ -132,15 +123,13 @@ public class GameView extends View implements Runnable {
         captured = Bitmap.createScaledBitmap(temp, screenX - tileWidth * 3, screenY - tileHeight *3, true);
 
         //Create player
-        player = new Player(context, tileWidth * 18, tileHeight * 6, tileWidth * 2, 0, screenX, screenY, tileWidth * 2, tileHeight * 2);
+        //Context, startX, startY, screenX min, screenY min, screenX max, screenY max, width of player, width of height
+        player = new Player(context, tileWidth * 18, tileHeight * 6, screenMinX, screenMinY, screenMaxX, screenMaxY, tileWidth * 2, tileHeight * 2);
         player.setDirection(-1, 0);
         //Create our interactables
         door = new Interactables.Door(context, 0, tileHeight, tileWidth * 2, tileHeight * 2);
         key = new Interactables.Key(context, (int)(tileWidth * 2.5), tileHeight * 10, tileWidth, tileHeight);
         //Create our obstacles
-        //obstacleList.add(new Obstacles.SeatTwo(context, (int)(tileWidth * 7.2), (int)(tileHeight * 5.7), 2, 3));
-        //obstacleList.add(new Obstacles.SeatThree(context, (int)(tileWidth * 3.8), (int)(tileHeight * 8.7), 2, 2));
-        //obstacleList.add(new Obstacles.SeatFour(context, tileWidth * 2, (int)(tileHeight * 5.2), 2, 2));
         obstacleList.add(new Obstacles.Table(context, tileWidth * 2, tileHeight *  4, 7, 7));
         obstacleList.add(new Obstacles.LoungeChair(context, tileWidth * 16, tileHeight * 8, 4, 4));
         obstacleList.add(new Obstacles.Box(context, tileWidth * 3, 0, 3, 2));
@@ -155,9 +144,6 @@ public class GameView extends View implements Runnable {
                 lightList.add(o.getLight());
         }
         lightList.add(player.getSelfLight());
-
-//        debugMode = true;
-
     }
 
     @Override
@@ -176,9 +162,21 @@ public class GameView extends View implements Runnable {
         int newX = newCoords[0];
         int newY = newCoords[1];
 
+        Lights f = player.getFlashLight();
+
         //Detect collision between obstacles
         //If collision detected, reset coords
         for(Obstacles o : obstacleList) {
+            Rect box = o.getImageBox();
+            o.setIlluminated(f.detectCollision(box));
+            if(!o.isIlluminated()) {
+                for (Lights l : lightList) {
+                    if (l.detectCollision(box)) {
+                        o.setIlluminated(true);
+                        break;
+                    }
+                }
+            }
             if(o.detectCollision(newCoords[0], player.getCenterY()))
                 newX = player.getCenterX();
             if(o.detectCollision(player.getCenterX(), newCoords[1]))
@@ -190,6 +188,16 @@ public class GameView extends View implements Runnable {
         //Update enemy location & detect collision
         for(Enemies e : enemyList) {
             e.update();
+            Rect box = e.getImageBox();
+            e.setIlluminated(f.detectCollision(box));
+            if(!e.isIlluminated()) {
+                for (Lights l : lightList) {
+                    if (l.detectCollision(box)) {
+                        e.setIlluminated(true);
+                        break;
+                    }
+                }
+            }
             if(e.detectCollision(player.getCenterX(), player.getCenterY())) {
                 playing = false;
                 gameFinished = true;
@@ -199,9 +207,28 @@ public class GameView extends View implements Runnable {
         }
 
         //Detect collision between interactables
-        //if(detectCollision(player.getHitBox(), key.getHitBox())) {
         if(key.detectCollision(player.getCenterX(),player.getCenterY())) {
             player.foundKey();
+        }
+        Rect box = key.getImageBox();
+        key.setIlluminated(f.detectCollision(box));
+        if(!key.isIlluminated()) {
+            for (Lights l : lightList) {
+                if (l.detectCollision(box)) {
+                    key.setIlluminated(true);
+                    break;
+                }
+            }
+        }
+        box = door.getImageBox();
+        door.setIlluminated(f.detectCollision(box));
+        if(!door.isIlluminated()) {
+            for (Lights l : lightList) {
+                if (l.detectCollision(box)) {
+                    door.setIlluminated(true);
+                    break;
+                }
+            }
         }
         if(door.detectCollision(player.getCenterX(),player.getCenterY()) && player.hasKey()) {
             playing = false;
@@ -216,24 +243,23 @@ public class GameView extends View implements Runnable {
         if(!gameFinished) {
             //Draw background
             canvas.drawBitmap(background, 0, 0, paint);
-            //canvas.drawBitmap(wall, 0, 0, paint);
-
-            //canvas.drawBitmap(bear, tileWidth * 12, tileHeight * 2, paint);
-            //canvas.drawBitmap(papers, tileWidth * 15, tileHeight * 9, paint);
-            //canvas.drawBitmap(bottle, tileWidth * 15, tileHeight * 10, paint);
 
             //Draw interactables
-            if(!player.hasKey()) {
+            if(!player.hasKey() && (key.isIlluminated()) || MainActivity.mDebugModeOn) {
                 key.drawInteractable(canvas, paint);
                 if(MainActivity.mDebugModeOn)
                     key.drawHitBox(canvas, hitBoxPaint);
             }
-            door.drawInteractable(canvas, paint);
-            if(MainActivity.mDebugModeOn)
+            if(door.isIlluminated() || MainActivity.mDebugModeOn)
+                door.drawInteractable(canvas, paint);
+            if(MainActivity.mDebugModeOn) {
                 door.drawHitBox(canvas, hitBoxPaint);
+                canvas.drawRect(screenMinX, screenMinY, screenMaxX, screenMaxY, hitBoxPaint);
+            }
             //Draw obstacles
             for (Obstacles o : obstacleList) {
-                o.drawObstacle(canvas, paint);
+                if(o.illuminated || MainActivity.mDebugModeOn)
+                    o.drawObstacle(canvas, paint);
                 if(MainActivity.mDebugModeOn)
                     o.drawHitBox(canvas, hitBoxPaint);
             }
@@ -249,10 +275,12 @@ public class GameView extends View implements Runnable {
 
             //Draw enemies
             for(Enemies e : enemyList) {
-                canvas.save();
-                canvas.rotate((float) e.getAngleDegrees(), e.getCenterX(), e.getCenterY());
-                e.drawEnemy(canvas, paint);
-                canvas.restore();
+                if(e.illuminated || MainActivity.mDebugModeOn) {
+                    canvas.save();
+                    canvas.rotate((float) e.getAngleDegrees(), e.getCenterX(), e.getCenterY());
+                    e.drawEnemy(canvas, paint);
+                    canvas.restore();
+                }
                 if(MainActivity.mDebugModeOn)
                     e.drawHitBox(canvas, hitBoxPaint);
             }
@@ -277,8 +305,9 @@ public class GameView extends View implements Runnable {
             f.drawColorLight(darkness);
             darkness.restore();
             //Draws shadows and lights onto canvas
-            if(!MainActivity.mDebugModeOn)
+            if(!MainActivity.mDebugModeOn) {
                 canvas.drawBitmap(darknessBitmap, 0, 0, paint);
+            }
 
 
             //Draw HUD

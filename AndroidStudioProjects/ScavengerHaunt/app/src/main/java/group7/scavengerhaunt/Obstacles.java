@@ -16,6 +16,7 @@ import java.util.List;
 
 public class Obstacles {
     protected Rect hitBox;
+    protected Rect imageBox;
     protected Bitmap image;
     //Coordinates
     protected int x;
@@ -24,6 +25,8 @@ public class Obstacles {
     //Lights attached to obstacle, if any
     protected boolean hasLight = false;
     protected Lights light;
+
+    protected boolean illuminated = false;
 
     public Obstacles(Context context, int x, int y) {
         this.x = x;
@@ -42,12 +45,24 @@ public class Obstacles {
         canvas.drawRect(hitBox, paint);
     }
 
+    public void setIlluminated(boolean b) {
+        illuminated = b;
+    }
+
+    public boolean isIlluminated() {
+        return illuminated;
+    }
+
     public Bitmap getImage(){
         return image;
     }
 
     public Rect getHitBox() {
         return hitBox;
+    }
+
+    public Rect getImageBox() {
+        return imageBox;
     }
 
     public boolean hasLight() {
@@ -73,11 +88,13 @@ public class Obstacles {
             //Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.table);
             Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.table_full);
             image = Bitmap.createScaledBitmap(temp, GameView.tileWidth * scaleX, GameView.tileHeight * scaleY, true);
+            imageBox = new Rect(x, y, x+image.getWidth(), y+image.getHeight());
             hitBoxes.add(new Rect(x + image.getWidth() / 7, y + image.getHeight() / 6, x + 6 *image.getWidth() / 7, y + 3 * image.getHeight() / 4));
             hitBoxes.add(new Rect(x, y + image.getHeight() / 6, x + image.getWidth() / 6, y + image.getHeight()/2 ));
             hitBoxes.add(new Rect(x + image.getWidth()/ 3, y + 2*image.getHeight()/3, x + 4 *image.getWidth()/7, y + 5 *image.getHeight() / 6));
             hitBoxes.add(new Rect(x + 5 *image.getWidth()/6, y + image.getHeight() / 6, x + image.getWidth(), y + 4 * image.getHeight() / 7));
             hasLight = true;
+            illuminated = true;
             light = new Lights(x + image.getWidth() * 47 / 100, y + image.getHeight() * 35 /100, GameView.tileWidth * 2);
         }
 
@@ -101,6 +118,7 @@ public class Obstacles {
             super(context, x, y);
             Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.lounge_chair);
             image = Bitmap.createScaledBitmap(temp, GameView.tileWidth * scaleX, GameView.tileHeight * scaleY, true);
+            imageBox = new Rect(x, y, x+image.getWidth(), y+image.getHeight());
             hitBox = new Rect(x, y, x + image.getWidth(), y + image.getHeight());
         }
     }
@@ -110,6 +128,7 @@ public class Obstacles {
             super(context, x, y);
             Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.boxes);
             image = Bitmap.createScaledBitmap(temp, GameView.tileWidth * scaleX, GameView.tileHeight * scaleY, true);
+            imageBox = new Rect(x, y, x+image.getWidth(), y+image.getHeight());
             hitBox = new Rect(x, y, x + image.getWidth(), y + image.getHeight());
         }
     }
@@ -161,6 +180,7 @@ public class Obstacles {
             super(context, x, y);
             Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.fireplace_complete);
             image = Bitmap.createScaledBitmap(temp, GameView.tileWidth * scaleX, GameView.tileHeight * scaleY, true);
+            imageBox = new Rect(x, y, x+image.getWidth(), y+image.getHeight());
             p1[0] = (float)x - GameView.tileWidth;
             p1[1] = (float)y;
             p2[0] = (float)(x + image.getWidth());
@@ -168,6 +188,7 @@ public class Obstacles {
             p3[0] = (float)(x + image.getWidth());
             p3[1] = (float)(y + image.getHeight() + GameView.tileHeight);
             hasLight = true;
+            illuminated = true;
             light = new Lights(x + image.getWidth() * 3 / 5, y + image.getHeight() / 3, GameView.tileWidth * (scaleX * 2) / 3);
         }
 

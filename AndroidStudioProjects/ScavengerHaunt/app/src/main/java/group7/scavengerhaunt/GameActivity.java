@@ -107,4 +107,8 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
     public static double getAngle(double ux, double uy) {
         return Math.toDegrees(Math.acos(-uy));
     }
+
+    public static double calculateDistance(int startX, int startY, int destX, int destY) {
+        return Math.sqrt(Math.pow((destX - startX), 2) + Math.pow((destY - startY), 2));
+    }
 }
