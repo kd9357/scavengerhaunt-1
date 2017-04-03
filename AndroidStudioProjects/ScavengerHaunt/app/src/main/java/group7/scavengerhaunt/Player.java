@@ -106,7 +106,7 @@ public class Player {
         updateX(newX - imageWidth/2);
         updateY(newY - imageHeight/2);
 
-        distance = calculateDistance(destinationX, destinationY);
+        distance = GameActivity.calculateDistance(centerX, centerY, destinationX, destinationY);
         //Reached goal
         if(distance <= 20)
                 stopMoving();
@@ -129,7 +129,7 @@ public class Player {
     public void setDestination(int destX, int destY) {
         destinationX = destX;
         destinationY = destY;
-        distance = calculateDistance(destX, destY);
+        distance = GameActivity.calculateDistance(centerX, centerY, destX, destY);
         directionX = (destinationX - centerX) / distance;
         directionY = (destinationY - centerY) / distance;
     }
@@ -141,10 +141,6 @@ public class Player {
         angleDegrees = (float) GameActivity.getAngle(directionX, directionY);
         if(directionX < 0)
             angleDegrees = -angleDegrees;
-    }
-
-    private double calculateDistance(int destX, int destY) {
-        return Math.sqrt(Math.pow((destX - centerX), 2) + Math.pow((destY - centerY), 2));
     }
 
     private void updateX(int x) {

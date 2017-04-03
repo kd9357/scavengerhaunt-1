@@ -13,10 +13,13 @@ import android.graphics.Rect;
 
 public class Interactables {
     protected Rect hitBox;
+    protected Rect imageBox;
     protected Bitmap image;
     //Coordinates
     protected int x;
     protected int y;
+
+    protected boolean illuminated = false;
 
     public Interactables(Context context, int x, int y) {
         this.x = x;
@@ -31,12 +34,24 @@ public class Interactables {
         canvas.drawRect(hitBox, paint);
     }
 
+    public void setIlluminated(boolean b) {
+        illuminated = b;
+    }
+
+    public boolean isIlluminated() {
+        return illuminated;
+    }
+
     public Bitmap getImage(){
         return image;
     }
 
     public Rect getHitBox() {
         return hitBox;
+    }
+
+    public Rect getImageBox() {
+        return imageBox;
     }
 
     public int getX() {
@@ -61,6 +76,7 @@ public class Interactables {
             super(context, x, y);
             Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.door);
             image = Bitmap.createScaledBitmap(temp, tileWidth, tileHeight * 2, true);
+            imageBox = new Rect(x, y, x+image.getWidth(), y+image.getHeight());
             hitBox = new Rect(x + 2 * image.getWidth() / 3, y + image.getHeight()/3, x  + (int)(1.5 * image.getWidth()), y + image.getHeight());
         }
 
@@ -76,6 +92,7 @@ public class Interactables {
             super(context, x, y);
             Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.key);
             image = Bitmap.createScaledBitmap(temp, tileWidth, tileHeight, true);
+            imageBox = new Rect(x, y, x+image.getWidth(), y+image.getHeight());
             hitBox = new Rect(x + image.getWidth()/4, y, x + 3 *image.getWidth()/4, y + image.getHeight());
         }
     }

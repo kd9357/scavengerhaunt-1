@@ -27,6 +27,7 @@ public class Enemies {
 
     //Collision Detection
     protected Rect hitBox;
+    protected Rect imageBox;
 
     //Movement mechanics
     protected int speed;
@@ -38,6 +39,8 @@ public class Enemies {
     protected int distanceTraveled = 0;
 
     protected double angleDegrees = 0;
+
+    protected boolean illuminated = false;
 
     public Enemies(Context context, int x, int y) {
         this.x = x;
@@ -61,10 +64,7 @@ public class Enemies {
         if(moving) {
             setX(directionX * speed);
             setY(directionY * speed);
-            hitBox.left = x;
-            hitBox.top = y;
-            hitBox.right = x + imageWidth;
-            hitBox.bottom = y + imageHeight;
+            hitBox.offset(x, y);
             distanceTraveled += directionX * speed + directionY * speed;
         }
     }
@@ -85,6 +85,14 @@ public class Enemies {
         angleDegrees = (float) GameActivity.getAngle(directionX, directionY);
         if(directionX < 0)
             angleDegrees = -angleDegrees;
+    }
+
+    public void setIlluminated(boolean b) {
+        illuminated = b;
+    }
+
+    public boolean isIlluminated() {
+        return illuminated;
     }
 
     public Bitmap getImage(){
@@ -111,6 +119,14 @@ public class Enemies {
         return angleDegrees;
     }
 
+    public Rect getHitBox() {
+        return hitBox;
+    }
+
+    public Rect getImageBox() {
+        return imageBox;
+    }
+
     public static class Ghost extends Enemies {
         public Ghost (Context context, int x, int y, int scaleX, int scaleY) {
             super(context, x, y);
@@ -121,6 +137,7 @@ public class Enemies {
             centerX = x + image.getWidth()/2;
             centerY = y + image.getHeight()/2;
             hitBox = new Rect(x, y, x+imageWidth, y+imageHeight);
+            imageBox = new Rect(x, y, x+imageWidth, y+imageWidth);
             setDirection(-1, 0);
             patrolRoute = GameView.tileWidth * 7;
             moving = true;
@@ -132,6 +149,7 @@ public class Enemies {
                 setX(x + directionX * speed);
                 //setY(directionY * speed);
                 hitBox.offsetTo(x, y);
+                imageBox.offsetTo(x, y);
                 distanceTraveled += Math.abs(directionX * speed);
                 if(distanceTraveled >= patrolRoute) {
                     setDirection(-directionX, directionY);
