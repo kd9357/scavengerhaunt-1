@@ -15,7 +15,8 @@ import android.util.Log;
 public class Player {
     //Image
     private Bitmap image;
-    private int imageSize;
+    private int imageWidth;
+    private int imageHeight;
 
     //Screen Borders
     private int screenMinX = 0;
@@ -46,61 +47,83 @@ public class Player {
     private double angleDegrees = 0;
 
     //Movement speed
-    private int speed;
+    private int speed = 10;
     private boolean moving = false;
+
+    //Attached Lights
+    Lights.Flashlight flashlight;
+    Lights selflight;
+    private int radius;
+    private int startingAngle;
+    private int sweepingAngle;
 
     //Has key?
     private boolean hasKey = false;
 
-    public Player(Context context, int screenX, int screenY) {
+    //Context, startX, startY, screenX min, screenY min, screenX max, screenY max, width of player, width of height
+    public Player(Context context, int startX, int startY, int minX, int minY, int screenX, int screenY, int tileWidth, int tileHeight) {
+        //For the wall
+        screenMinX = minX;
+        screenMinY = minY;
         //Set current orientation to point northwards as default
-        image = BitmapFactory.decodeResource(context.getResources(), R.drawable.placeholder_player);
-        //Currently assuming player is square
-        imageSize = image.getWidth();
-        x = screenX / 2 - imageSize / 2;
-        y = screenY / 2 - imageSize / 2;
-        speed = 10;
-        centerX = x + imageSize / 2;
-        centerY = y + imageSize / 2;
-        hitBox = new Rect(x, y, x + imageSize, y + imageSize);
-        screenMaxX = screenX - imageSize;
-        screenMaxY = screenY - imageSize;
+        Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.avatar);
+        image = Bitmap.createScaledBitmap(temp, tileWidth, tileHeight, true);
+        this.imageWidth = image.getWidth();
+        this.imageHeight = image.getHeight();
+        //Set position
+//        updateX(screenX/2);
+//        updateY(screenY/2);
+        updateX(startX);
+        updateY(startY);
+        hitBox = new Rect(x, y, x + imageWidth, y + imageHeight);
+        screenMaxX = screenX - imageWidth;
+        screenMaxY = screenY - imageHeight;
+        //Create flashlight
+        radius = tileWidth * 3; //Is actually tileWidth * 8 of original view
+        startingAngle = 243;
+        sweepingAngle = 51;
+        flashlight = new Lights.Flashlight(x + imageWidth/8, y + imageHeight/8, radius, startingAngle, sweepingAngle);
+        selflight = new Lights(centerX,centerY,imageHeight/2);
     }
 
-    //Controls player location
-    public void update() {
+    //Controls player location & flashlight radius
+    public int[] update() {
+        int[] coords = {this.centerX, this.centerY};
         if(moving) {
             //Set orientation
             angleDegrees = (float) GameActivity.getAngle(directionX, directionY);
             if(directionX < 0)
                 angleDegrees = -angleDegrees;
-            //Set new location
-            x += directionX * speed;
-            centerX = x + imageSize / 2;
-            y += directionY * speed;
-            centerY = y + imageSize / 2;
-            distance = calculateDistance(destinationX, destinationY);
-            //Reached goal
-            if(distance <= 50)
-                stopMoving();
+            coords[0] += directionX * speed;
+            coords[1] += directionY * speed;
         }
+        //TODO: if doing battery, update radius of flashlight here
+        return coords;
+    }
+
+    //Sets player location
+    public void setLocation(int newX, int newY) {
+        updateX(newX - imageWidth/2);
+        updateY(newY - imageHeight/2);
+
+        distance = calculateDistance(destinationX, destinationY);
+        //Reached goal
+        if(distance <= 20)
+                stopMoving();
+
         //Ensure player does not leave screen
         if(x > screenMaxX)
-            x = screenMaxX;
-        else if(x < screenMinX)
-            x = screenMinX;
+            updateX(screenMaxX);
+        else if(centerX < screenMinX)
+            updateX(screenMinX - imageWidth/2);
         if(y > screenMaxY)
-            y = screenMaxY;
-        else if(y < screenMinY)
-            y = screenMinY;
+            updateY(screenMaxY);
+        else if(centerY < screenMinY)
+            updateY(screenMinY - imageHeight/2);
 
-        centerX = x + imageSize / 2;
-        centerY = y + imageSize / 2;
-
-        hitBox.left = x;
-        hitBox.top = y;
-        hitBox.right = x + imageSize;
-        hitBox.bottom = y + imageSize;
+        hitBox.offsetTo(x, y);
+        flashlight.setCircle(x + imageWidth/8, y + imageHeight/8, radius);
+        selflight.setCircle(centerX, centerY, imageHeight/2);
     }
 
     public void setDestination(int destX, int destY) {
@@ -111,8 +134,27 @@ public class Player {
         directionY = (destinationY - centerY) / distance;
     }
 
+    //X, Y must be normalized
+    public void setDirection(int xVector, int yVector) {
+        directionX = xVector;
+        directionY = yVector;
+        angleDegrees = (float) GameActivity.getAngle(directionX, directionY);
+        if(directionX < 0)
+            angleDegrees = -angleDegrees;
+    }
+
     private double calculateDistance(int destX, int destY) {
         return Math.sqrt(Math.pow((destX - centerX), 2) + Math.pow((destY - centerY), 2));
+    }
+
+    private void updateX(int x) {
+        this.x = x;
+        centerX = x + imageWidth/2;
+    }
+
+    private void updateY(int y) {
+        this.y = y;
+        centerY = y + imageHeight/2;
     }
 
     public void startMoving() { moving = true; }
@@ -150,6 +192,11 @@ public class Player {
     public Rect getHitBox() {
         return hitBox;
     }
+
+
+    public Lights.Flashlight getFlashLight() { return flashlight; }
+
+    public Lights getSelfLight() {return selflight; }
 
     public boolean hasKey() {
         return hasKey;

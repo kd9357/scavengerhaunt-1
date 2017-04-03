@@ -5,4 +5,10 @@
         android:title="@string/sound_title"
         android:defaultValue="true"
         android:summary="@string/sound_summary"/>
+    <CheckBoxPreference
+        android:key="debug"
+        android:title="@string/debug_title"
+        android:defaultValue="false"
+        android:summary="@string/debug_summary"/>
+
 </PreferenceScreen>

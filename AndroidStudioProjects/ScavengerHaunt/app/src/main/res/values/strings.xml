@@ -1,8 +1,10 @@
 <resources>
     <string name="app_name">ScavengerHaunt</string>
     <string name="how_to_play_title">How to Play</string>
-    <string name="how_to_play_text">TEST TEST TEST\n... ... ...\n</string>
+    <string name="how_to_play_text">Touch the screen to move around. Find the key to unlock the door and escape, but beware of monsters prowling in the dark!</string>
     <string name="sound_title">Sound</string>
     <string name="sound_summary">Turn the sound on or off</string>
     <string name="stage_select_title">Select a Stage</string>
+    <string name="debug_title">Enable Debug Mode</string>
+    <string name="debug_summary">Turn off shadows and make collision boxes visible</string>
 </resources>

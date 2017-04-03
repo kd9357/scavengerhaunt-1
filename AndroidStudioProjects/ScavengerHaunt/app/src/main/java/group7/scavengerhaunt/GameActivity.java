@@ -1,19 +1,26 @@
 package group7.scavengerhaunt;
 
+import android.app.FragmentManager;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Point;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Display;
+import android.view.View;
+import android.widget.ImageButton;
 
-public class GameActivity extends AppCompatActivity {
+public class GameActivity extends AppCompatActivity implements View.OnClickListener{
 
     private static final String TAG = "Game Interface";
-    //Represents the internal state of the game
-    private Game mGame;
+    private int SETTINGS_REQUEST = 1;
 
     //Surface view of game
     private GameView gameView;
 
+    private ImageButton buttonSettingsGear;
     //Is the game over or not?
     private boolean mGameOver;
 
@@ -21,16 +28,29 @@ public class GameActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_game);
 
         //Display object
         Display display = getWindowManager().getDefaultDisplay();
         //Get screen resolution
         Point size = new Point();
         display.getSize(size);
+        //SurfaceView
+        gameView = (GameView) findViewById(R.id.game_view);
+        //Eventually, initialize will have more parameters for spawn locations etc
+        gameView.initialize(this, size.x, size.y);
 
-        gameView = new GameView(this, size.x, size.y);
-        setContentView(gameView);
-        //setContentView(R.layout.activity_game);
+        buttonSettingsGear = (ImageButton) findViewById(R.id.buttonSettingsGear);
+        buttonSettingsGear.setOnClickListener(this);
+
+        setInstanceVarsFromSharedPrefs();
+    }
+
+    // Dialog fragment for when user wins / loses
+    protected void handleEndGame() {
+        FragmentManager fm = getFragmentManager();
+        EndGameFragment f = new EndGameFragment();
+        f.show(fm, "end");
     }
 
     //Pause activity
@@ -56,7 +76,34 @@ public class GameActivity extends AppCompatActivity {
         gameView.pause();
     }
 
-    //Given a direction vector, find the heading in degrees
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        //Called when Settings has been exited
+        if(requestCode == SETTINGS_REQUEST) {
+            //SharedPreferences sharedPref = getPreferences(MODE_PRIVATE);
+            SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+            MainActivity.mSoundOn = sharedPref.getBoolean("sound", true);
+            MainActivity.mDebugModeOn = sharedPref.getBoolean("debug", false);
+        }
+    }
+
+    private void setInstanceVarsFromSharedPrefs() {
+        //SharedPreferences sharedPref = getPreferences(MODE_PRIVATE);
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        MainActivity.mSoundOn = sharedPref.getBoolean("sound", true);
+        MainActivity.mDebugModeOn = sharedPref.getBoolean("debug", false);
+    }
+
+    @Override
+    public void onClick(View v) {
+        //Go to settings screen
+        if(v==buttonSettingsGear) {
+            Intent intent = new Intent(this, SettingsActivity.class);
+            startActivityForResult(intent, SETTINGS_REQUEST);
+        }
+    }
+
+    //Given a direction vector, find the heading in degrees in relation to north
     public static double getAngle(double ux, double uy) {
         return Math.toDegrees(Math.acos(-uy));
     }
