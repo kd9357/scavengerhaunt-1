@@ -5,6 +5,8 @@
     <string name="sound_title">Sound</string>
     <string name="sound_summary">Turn the sound on or off</string>
     <string name="stage_select_title">Select a Stage</string>
+    <string name="shadow_title">Soft Shadows</string>
+    <string name="shadow_summary">Disable to improve performance</string>
     <string name="debug_title">Enable Debug Mode</string>
     <string name="debug_summary">Turn off shadows and make collision boxes visible</string>
 </resources>

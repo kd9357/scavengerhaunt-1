@@ -83,6 +83,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
             //SharedPreferences sharedPref = getPreferences(MODE_PRIVATE);
             SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
             MainActivity.mSoundOn = sharedPref.getBoolean("sound", true);
+            MainActivity.mSoftShadowsOn = sharedPref.getBoolean("shadows", true);
             MainActivity.mDebugModeOn = sharedPref.getBoolean("debug", false);
         }
     }
@@ -91,6 +92,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         //SharedPreferences sharedPref = getPreferences(MODE_PRIVATE);
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         MainActivity.mSoundOn = sharedPref.getBoolean("sound", true);
+        MainActivity.mSoftShadowsOn = sharedPref.getBoolean("shadows", true);
         MainActivity.mDebugModeOn = sharedPref.getBoolean("debug", false);
     }
 

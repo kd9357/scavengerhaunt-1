@@ -13,12 +13,9 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.RadialGradient;
 import android.graphics.Rect;
-import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
 import android.view.View;
 
 import java.util.ArrayList;
@@ -69,7 +66,7 @@ public class GameView extends View implements Runnable {
     //For drawing
     private Paint paint;                //Draws images
     private Paint transparentPaint;     //Draws flashlight
-    private Paint normalLightsPaint;    //Draws other lights
+    private Paint blurredLightsPaint;    //Draws other lights
     private Paint hitBoxPaint;
     private Canvas darkness;
     private Bitmap darknessBitmap;
@@ -103,10 +100,10 @@ public class GameView extends View implements Runnable {
         transparentPaint.setColor(Color.TRANSPARENT);
         transparentPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
 
-        normalLightsPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        normalLightsPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_OUT));
-        normalLightsPaint.setColor(Color.TRANSPARENT);
-        normalLightsPaint.setMaskFilter(new BlurMaskFilter(50, BlurMaskFilter.Blur.NORMAL));
+        blurredLightsPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        blurredLightsPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_OUT));
+        blurredLightsPaint.setColor(Color.TRANSPARENT);
+        blurredLightsPaint.setMaskFilter(new BlurMaskFilter(60, BlurMaskFilter.Blur.NORMAL));
 
         hitBoxPaint = new Paint();
         hitBoxPaint.setStyle(Paint.Style.STROKE);
@@ -162,6 +159,7 @@ public class GameView extends View implements Runnable {
         int newX = newCoords[0];
         int newY = newCoords[1];
 
+        //TODO: Check for player direction as well
         Lights f = player.getFlashLight();
 
         //Detect collision between obstacles
@@ -169,7 +167,7 @@ public class GameView extends View implements Runnable {
         for(Obstacles o : obstacleList) {
             Rect box = o.getImageBox();
             o.setIlluminated(f.detectCollision(box));
-            if(!o.isIlluminated()) {
+            if(!o.isIlluminated() || !o.hasLight()) {
                 for (Lights l : lightList) {
                     if (l.detectCollision(box)) {
                         o.setIlluminated(true);
@@ -245,7 +243,7 @@ public class GameView extends View implements Runnable {
             canvas.drawBitmap(background, 0, 0, paint);
 
             //Draw interactables
-            if(!player.hasKey() && (key.isIlluminated()) || MainActivity.mDebugModeOn) {
+            if(!player.hasKey() && (key.isIlluminated() || MainActivity.mDebugModeOn)) {
                 key.drawInteractable(canvas, paint);
                 if(MainActivity.mDebugModeOn)
                     key.drawHitBox(canvas, hitBoxPaint);
@@ -295,7 +293,10 @@ public class GameView extends View implements Runnable {
             darkness.restore();
             //Draw other lights
             for(Lights l : lightList) {
-                l.drawLight(darkness, normalLightsPaint);
+                if(MainActivity.mSoftShadowsOn)
+                    l.drawLight(darkness, blurredLightsPaint);
+                else
+                    l.drawLight(darkness, transparentPaint);
                 if(MainActivity.mDebugModeOn)
                     l.drawLight(canvas, hitBoxPaint);
             }
@@ -308,7 +309,6 @@ public class GameView extends View implements Runnable {
             if(!MainActivity.mDebugModeOn) {
                 canvas.drawBitmap(darknessBitmap, 0, 0, paint);
             }
-
 
             //Draw HUD
             if(player.hasKey()) {
@@ -336,19 +336,6 @@ public class GameView extends View implements Runnable {
             e.printStackTrace();
         }
     }
-
-//    private boolean detectCollision(Rect a, Rect b) {
-//        return Rect.intersects(a, b);
-//        //return detectCollisionX(a,b) && detectCollisionY(a,b);
-//    }
-
-//    private boolean detectCollisionX(Rect a, Rect b) {
-//        return (a.left >= b.left && a.left <= b.right) || (b.left >= a.left && b.left <= a.right);
-//    }
-//
-//    private boolean detectCollisionY(Rect a, Rect b) {
-//        return (a.top >= b.top && a.top <= b.bottom) || (b.top >= a.top && b.top <= a.bottom);
-//    }
 
     public void pause() {
         //When the game is paused
@@ -384,6 +371,8 @@ public class GameView extends View implements Runnable {
                             gameActivity.finish();
                         }
                     }
+                    //if gamelost, do gameActivity.recreate() to reset
+                    //otherwise, get a new intent for next stage, gameActivity.finish(), then startActivity(intent)
                 }
                 else {
                     player.setDestination((int) motionEvent.getX(), (int) motionEvent.getY());
