@@ -53,6 +53,7 @@ public class GameView extends View implements Runnable {
 
     //Game Objects
     private Player player;
+    private Interactables.Battery battery;
     private Interactables.Door door;
     private Interactables.Key key;
     private List<Obstacles> obstacleList = new ArrayList<>();
@@ -108,7 +109,7 @@ public class GameView extends View implements Runnable {
         //Create our background and decorations
         Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.background_full);
         background = Bitmap.createScaledBitmap(temp, screenX, screenY, true);
-
+        temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.battery_full);
         //End Game drawables
         temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.escaped);
         escaped = Bitmap.createScaledBitmap(temp, screenX - tileWidth * 3, screenY - tileHeight * 3, true);
@@ -120,6 +121,7 @@ public class GameView extends View implements Runnable {
         player = new Player(context, tileWidth * 18, tileHeight * 6, screenMinX, screenMinY, screenMaxX, screenMaxY, tileWidth * 2, tileHeight * 2);
         player.setDirection(-1, 0);
         //Create our interactables
+        battery = new Interactables.Battery(context, tileWidth/3, 0, tileWidth, tileHeight);
         door = new Interactables.Door(context, 0, tileHeight, tileWidth * 2, tileHeight * 2);
         key = new Interactables.Key(context, (int)(tileWidth * 2.5), tileHeight * 10, tileWidth, tileHeight);
         //Create our obstacles
@@ -154,6 +156,7 @@ public class GameView extends View implements Runnable {
         //Update player location
         int[] newCoords = player.update();
         Lights.Flashlight f = player.getFlashLight();
+        battery.setPercentage((float)player.getRadius() / player.getMaxRadius());
         //Detect hitbox intersections
         obstacleCollision(newCoords[0], newCoords[1], f);
         enemyCollision(f);
@@ -332,8 +335,9 @@ public class GameView extends View implements Runnable {
     }
 
     private void drawHUD(Canvas canvas) {
+        battery.drawInteractable(canvas, paint);
         if(player.hasKey()) {
-            canvas.drawBitmap(key.getImage(), 0, 0, paint);
+            canvas.drawBitmap(key.getImage(), 3 * tileWidth / 2, 0, paint);
         }
     }
 

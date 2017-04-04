@@ -210,6 +210,13 @@ public class Player {
 
     public Lights getSelfLight() {return selflight; }
 
+    public int getRadius() {
+        return flashLightRadius;
+    }
+    public int getMaxRadius() {
+        return maxRadius;
+    }
+
     public boolean hasKey() {
         return hasKey;
     }

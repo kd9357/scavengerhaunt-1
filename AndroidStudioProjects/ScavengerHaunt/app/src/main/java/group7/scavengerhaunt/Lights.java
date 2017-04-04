@@ -92,7 +92,7 @@ public class Lights {
 
         public void setRadius(int r) {
             this.radius = r;
-            largerRadius = radius + radius / 6;
+            largerRadius = radius + 3 * GameView.tileWidth / 2;
             circle.set(getX()-r, getY()-r, getX()+r, getY()+r);
         }
 
