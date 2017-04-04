@@ -1,8 +1,6 @@
 package group7.scavengerhaunt;
 
-import android.app.FragmentManager;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.BlurMaskFilter;
@@ -11,10 +9,8 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
-import android.graphics.RadialGradient;
 import android.graphics.Rect;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -103,7 +99,7 @@ public class GameView extends View implements Runnable {
         blurredLightsPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         blurredLightsPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_OUT));
         blurredLightsPaint.setColor(Color.TRANSPARENT);
-        blurredLightsPaint.setMaskFilter(new BlurMaskFilter(60, BlurMaskFilter.Blur.NORMAL));
+        blurredLightsPaint.setMaskFilter(new BlurMaskFilter(50, BlurMaskFilter.Blur.NORMAL));
 
         hitBoxPaint = new Paint();
         hitBoxPaint.setStyle(Paint.Style.STROKE);
@@ -136,11 +132,11 @@ public class GameView extends View implements Runnable {
         enemyList.add(new Enemies.Ghost(context, tileWidth * 12, tileHeight * 2, 3, 3));
 
         //Create our lights
+        lightList.add(player.getSelfLight());
         for(Obstacles o : obstacleList) {
             if(o.hasLight())
                 lightList.add(o.getLight());
         }
-        lightList.add(player.getSelfLight());
     }
 
     @Override
@@ -151,18 +147,20 @@ public class GameView extends View implements Runnable {
             postInvalidate();
             controlFrameRate();
         }
+        //TODO: if using dialog to end game handle here
     }
 
     public void update() {
         //Update player location
         int[] newCoords = player.update();
-        int newX = newCoords[0];
-        int newY = newCoords[1];
+        Lights.Flashlight f = player.getFlashLight();
+        //Detect hitbox intersections
+        obstacleCollision(newCoords[0], newCoords[1], f);
+        enemyCollision(f);
+        interactablesCollision(f);
+    }
 
-        //TODO: Check for player direction as well
-        Lights f = player.getFlashLight();
-
-        //Detect collision between obstacles
+    private void obstacleCollision(int newX, int newY, Lights.Flashlight f) {
         //If collision detected, reset coords
         for(Obstacles o : obstacleList) {
             Rect box = o.getImageBox();
@@ -175,15 +173,16 @@ public class GameView extends View implements Runnable {
                     }
                 }
             }
-            if(o.detectCollision(newCoords[0], player.getCenterY()))
+            if(o.detectCollision(newX, player.getCenterY()))
                 newX = player.getCenterX();
-            if(o.detectCollision(player.getCenterX(), newCoords[1]))
+            if(o.detectCollision(player.getCenterX(), newY))
                 newY = player.getCenterY();
         }
         if(newX != player.getCenterX() || newY != player.getCenterY())
             player.setLocation(newX,newY);
+    }
 
-        //Update enemy location & detect collision
+    private void enemyCollision(Lights.Flashlight f) {
         for(Enemies e : enemyList) {
             e.update();
             Rect box = e.getImageBox();
@@ -203,11 +202,11 @@ public class GameView extends View implements Runnable {
                 break;
             }
         }
+    }
 
-        //Detect collision between interactables
-        if(key.detectCollision(player.getCenterX(),player.getCenterY())) {
+    private void interactablesCollision(Lights.Flashlight f) {
+        if(key.detectCollision(player.getCenterX(),player.getCenterY()))
             player.foundKey();
-        }
         Rect box = key.getImageBox();
         key.setIlluminated(f.detectCollision(box));
         if(!key.isIlluminated()) {
@@ -239,81 +238,16 @@ public class GameView extends View implements Runnable {
     public void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         if(!gameFinished) {
-            //Draw background
+            //Draw background + shadowmap
             canvas.drawBitmap(background, 0, 0, paint);
-
-            //Draw interactables
-            if(!player.hasKey() && (key.isIlluminated() || MainActivity.mDebugModeOn)) {
-                key.drawInteractable(canvas, paint);
-                if(MainActivity.mDebugModeOn)
-                    key.drawHitBox(canvas, hitBoxPaint);
-            }
-            if(door.isIlluminated() || MainActivity.mDebugModeOn)
-                door.drawInteractable(canvas, paint);
-            if(MainActivity.mDebugModeOn) {
-                door.drawHitBox(canvas, hitBoxPaint);
-                canvas.drawRect(screenMinX, screenMinY, screenMaxX, screenMaxY, hitBoxPaint);
-            }
-            //Draw obstacles
-            for (Obstacles o : obstacleList) {
-                if(o.illuminated || MainActivity.mDebugModeOn)
-                    o.drawObstacle(canvas, paint);
-                if(MainActivity.mDebugModeOn)
-                    o.drawHitBox(canvas, hitBoxPaint);
-            }
-
+            drawInteractables(canvas);
+            drawObstacles(canvas);
             //Draw player below lights (for now)
             //Drawing underneath lights disguises some lag of the flashlight
-            canvas.save();
-            canvas.rotate((float) player.getAngleDegrees(), player.getCenterX(), player.getCenterY());
-            canvas.drawBitmap(player.getImage(), player.getX(), player.getY(), paint);
-            canvas.restore();
-            if(MainActivity.mDebugModeOn)
-                canvas.drawRect(player.getHitBox(), hitBoxPaint);
-
-            //Draw enemies
-            for(Enemies e : enemyList) {
-                if(e.illuminated || MainActivity.mDebugModeOn) {
-                    canvas.save();
-                    canvas.rotate((float) e.getAngleDegrees(), e.getCenterX(), e.getCenterY());
-                    e.drawEnemy(canvas, paint);
-                    canvas.restore();
-                }
-                if(MainActivity.mDebugModeOn)
-                    e.drawHitBox(canvas, hitBoxPaint);
-            }
-
-            //Draw Lights
-            darkness.drawRect(0, 0, screenMaxX, screenMaxY, paint);
-            //Draw Flashlight
-            darkness.save();
-            darkness.rotate((float) player.getAngleDegrees(), player.getCenterX(), player.getCenterY());
-            Lights.Flashlight f = player.getFlashLight();
-            f.drawLight(darkness, transparentPaint);
-            darkness.restore();
-            //Draw other lights
-            for(Lights l : lightList) {
-                if(MainActivity.mSoftShadowsOn)
-                    l.drawLight(darkness, blurredLightsPaint);
-                else
-                    l.drawLight(darkness, transparentPaint);
-                if(MainActivity.mDebugModeOn)
-                    l.drawLight(canvas, hitBoxPaint);
-            }
-            //Draw flashlight color over other lights
-            darkness.save();
-            darkness.rotate((float) player.getAngleDegrees(), player.getCenterX(), player.getCenterY());
-            f.drawColorLight(darkness);
-            darkness.restore();
-            //Draws shadows and lights onto canvas
-            if(!MainActivity.mDebugModeOn) {
-                canvas.drawBitmap(darknessBitmap, 0, 0, paint);
-            }
-
-            //Draw HUD
-            if(player.hasKey()) {
-                canvas.drawBitmap(key.getImage(), 0, 0, paint);
-            }
+            drawPlayer(canvas);
+            drawEnemies(canvas);
+            drawLights(canvas);
+            drawHUD(canvas);
         }
         //Handle endgame (to be removed and replaced with dialog fragment)
         else {
@@ -322,7 +256,86 @@ public class GameView extends View implements Runnable {
             else
                 canvas.drawBitmap(captured, (int) (tileWidth * 1.5), (int) (tileHeight * 1.5), paint);
         }
-}
+    }
+
+    private void drawInteractables(Canvas canvas) {
+        if(!player.hasKey() && (key.isIlluminated())) {
+            key.drawInteractable(canvas, paint);
+            if(MainActivity.mDebugModeOn)
+                key.drawHitBox(canvas, hitBoxPaint);
+        }
+        if(door.isIlluminated())
+            door.drawInteractable(canvas, paint);
+        if(MainActivity.mDebugModeOn) {
+            door.drawHitBox(canvas, hitBoxPaint);
+            canvas.drawRect(screenMinX, screenMinY, screenMaxX, screenMaxY, hitBoxPaint);
+        }
+    }
+
+    private void drawObstacles(Canvas canvas) {
+        for (Obstacles o : obstacleList) {
+            if(o.illuminated)
+                o.drawObstacle(canvas, paint);
+            if(MainActivity.mDebugModeOn)
+                o.drawHitBox(canvas, hitBoxPaint);
+        }
+    }
+
+    private void drawPlayer(Canvas canvas) {
+        canvas.save();
+        canvas.rotate((float) player.getAngleDegrees(), player.getCenterX(), player.getCenterY());
+        canvas.drawBitmap(player.getImage(), player.getX(), player.getY(), paint);
+        canvas.restore();
+        if(MainActivity.mDebugModeOn)
+            canvas.drawRect(player.getHitBox(), hitBoxPaint);
+    }
+
+    private void drawEnemies(Canvas canvas) {
+        for(Enemies e : enemyList) {
+            if(e.illuminated) {
+                canvas.save();
+                canvas.rotate((float) e.getAngleDegrees(), e.getCenterX(), e.getCenterY());
+                e.drawEnemy(canvas, paint);
+                canvas.restore();
+            }
+            if(MainActivity.mDebugModeOn)
+                e.drawHitBox(canvas, hitBoxPaint);
+        }
+    }
+
+    private void drawLights(Canvas canvas) {
+        darkness.drawRect(0, 0, screenMaxX, screenMaxY, paint);
+        //Draw Flashlight
+        darkness.save();
+        darkness.rotate((float) player.getAngleDegrees(), player.getCenterX(), player.getCenterY());
+        Lights.Flashlight f = player.getFlashLight();
+        f.drawLight(darkness, transparentPaint);
+        darkness.restore();
+        //Draw other lights
+        for(Lights l : lightList) {
+            if(MainActivity.mSoftShadowsOn)
+                l.drawLight(darkness, blurredLightsPaint);
+            else
+                l.drawLight(darkness, transparentPaint);
+            if(MainActivity.mDebugModeOn)
+                l.drawLight(canvas, hitBoxPaint);
+        }
+        //Draw flashlight color over other lights
+        darkness.save();
+        darkness.rotate((float) player.getAngleDegrees(), player.getCenterX(), player.getCenterY());
+        f.drawColorLight(darkness);
+        darkness.restore();
+        //Draws shadows and lights onto canvas
+        if(!MainActivity.mDebugModeOn) {
+            canvas.drawBitmap(darknessBitmap, 0, 0, paint);
+        }
+    }
+
+    private void drawHUD(Canvas canvas) {
+        if(player.hasKey()) {
+            canvas.drawBitmap(key.getImage(), 0, 0, paint);
+        }
+    }
 
     //This supposedly makes the game run at a steady 60fps
     //TODO: modify the length of sleep to maintain steady fps
@@ -365,6 +378,7 @@ public class GameView extends View implements Runnable {
             //Screen is touched, face in destination direction
             //If held down, move in that direction as well
             case MotionEvent.ACTION_DOWN:
+                //TODO: If using dialog remove this
                 if (gameFinished) {
                     if (motionEvent.getX() > screenMaxX - tileWidth * 6 && motionEvent.getX() < screenMaxX - tileWidth) {
                         if (motionEvent.getY() > screenMaxY - tileHeight * 5 && motionEvent.getY() < screenMaxY - tileHeight) {

@@ -40,8 +40,9 @@ public class Player {
     //The current distance between the player and the point
     private double distance;
     //The normalized direction the player should be heading to
-    private double directionX;
-    private double directionY;
+    private double[] direction;
+//    private double directionX;
+//    private double directionY;
     //Player's heading in relation with North
     private double angleDegrees = 0;
 
@@ -51,8 +52,12 @@ public class Player {
 
     //Attached Lights
     Lights.Flashlight flashlight;
+    private int flashLightXOffset;
+    private int flashLightYOffset;
     Lights selflight;
-    private int radius;
+    private int maxRadius;
+    private int flashLightRadius;
+    private int selfLightRadius;
     private int startingAngle;
     private int sweepingAngle;
 
@@ -70,19 +75,22 @@ public class Player {
         this.imageWidth = image.getWidth();
         this.imageHeight = image.getHeight();
         //Set position
-//        updateX(screenX/2);
-//        updateY(screenY/2);
+        direction = new double[]{0, -1};
         updateX(startX);
         updateY(startY);
         hitBox = new Rect(x, y, x + imageWidth, y + imageHeight);
         screenMaxX = screenX - imageWidth;
         screenMaxY = screenY - imageHeight;
         //Create flashlight
-        radius = tileWidth * 3; //Is actually tileWidth * 8 of original view
+        maxRadius = tileWidth * 3;
+        flashLightRadius = maxRadius; //Is actually tileWidth * 8 of original view
+        selfLightRadius = 3 * imageWidth / 5;
         startingAngle = 243;
-        sweepingAngle = 51;
-        flashlight = new Lights.Flashlight(x + imageWidth/8, y + imageHeight/8, radius, startingAngle, sweepingAngle);
-        selflight = new Lights(centerX,centerY,imageHeight/2);
+        sweepingAngle = 54;
+        flashLightXOffset = imageWidth/8;
+        flashLightYOffset = imageHeight/8;
+        flashlight = new Lights.Flashlight(x + flashLightXOffset, y + flashLightYOffset, flashLightRadius, startingAngle, sweepingAngle, getDirection());
+        selflight = new Lights(centerX, centerY, selfLightRadius);
     }
 
     //Controls player location & flashlight radius
@@ -90,13 +98,17 @@ public class Player {
         int[] coords = {this.centerX, this.centerY};
         if(moving) {
             //Set orientation
-            angleDegrees = (float) GameActivity.getAngle(directionX, directionY);
-            if(directionX < 0)
+            angleDegrees = (float) GameActivity.getAngle(direction[0], direction[1]);
+            if(direction[0] < 0)
                 angleDegrees = -angleDegrees;
-            coords[0] += directionX * speed;
-            coords[1] += directionY * speed;
+            coords[0] += direction[0] * speed;
+            coords[1] += direction[1] * speed;
         }
         //TODO: if doing battery, update radius of flashlight here
+        if(flashLightRadius > 1) {
+            flashLightRadius--;
+            flashlight.setRadius(flashLightRadius);
+        }
         return coords;
     }
 
@@ -121,25 +133,28 @@ public class Player {
             updateY(screenMinY - imageHeight/2);
 
         hitBox.offsetTo(x, y);
-        flashlight.setCircle(x + imageWidth/8, y + imageHeight/8, radius);
-        selflight.setCircle(centerX, centerY, imageHeight/2);
+        flashlight.setCircle(x + flashLightXOffset, y + flashLightYOffset, flashLightRadius);
+        flashlight.setDirection(getDirection());
+        selflight.setCircle(centerX, centerY, selfLightRadius);
     }
 
     public void setDestination(int destX, int destY) {
         destinationX = destX;
         destinationY = destY;
         distance = GameActivity.calculateDistance(centerX, centerY, destX, destY);
-        directionX = (destinationX - centerX) / distance;
-        directionY = (destinationY - centerY) / distance;
+        direction[0] = (destinationX - centerX) / distance;
+        direction[1] = (destinationY - centerY) / distance;
     }
 
     //X, Y must be normalized
-    public void setDirection(int xVector, int yVector) {
-        directionX = xVector;
-        directionY = yVector;
-        angleDegrees = (float) GameActivity.getAngle(directionX, directionY);
-        if(directionX < 0)
+    public void setDirection(double xVector, double yVector) {
+        direction[0] = xVector;
+        direction[1] = yVector;
+        angleDegrees = (float) GameActivity.getAngle(direction[0], direction[1]);
+        if(direction[0] < 0)
             angleDegrees = -angleDegrees;
+        flashlight.setCircle(x + flashLightXOffset, y + flashLightYOffset, flashLightRadius);
+        flashlight.setDirection(getDirection());
     }
 
     private void updateX(int x) {
@@ -188,7 +203,9 @@ public class Player {
         return hitBox;
     }
 
-
+    public double[] getDirection() {
+        return direction;
+    }
     public Lights.Flashlight getFlashLight() { return flashlight; }
 
     public Lights getSelfLight() {return selflight; }
