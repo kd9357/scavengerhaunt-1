@@ -55,12 +55,14 @@ public class Player {
     private int flashLightXOffset;
     private int flashLightYOffset;
     Lights selflight;
-    private int maxRadius;
     private int flashLightRadius;
     private int selfLightRadius;
     private int startingAngle;
     private int sweepingAngle;
 
+    Interactables.Battery battery;
+    private long lastTime;
+    private float charge;
     //Has key?
     private boolean hasKey = false;
 
@@ -82,8 +84,7 @@ public class Player {
         screenMaxX = screenX - imageWidth;
         screenMaxY = screenY - imageHeight;
         //Create flashlight
-        maxRadius = tileWidth * 3;
-        flashLightRadius = maxRadius; //Is actually tileWidth * 8 of original view
+        flashLightRadius = tileWidth * 3;
         selfLightRadius = 3 * imageWidth / 5;
         startingAngle = 243;
         sweepingAngle = 54;
@@ -91,6 +92,9 @@ public class Player {
         flashLightYOffset = imageHeight/8;
         flashlight = new Lights.Flashlight(x + flashLightXOffset, y + flashLightYOffset, flashLightRadius, startingAngle, sweepingAngle, getDirection());
         selflight = new Lights(centerX, centerY, selfLightRadius);
+        charge = 1.0f;
+        battery = new Interactables.Battery(context, charge, GameView.tileWidth /3, 0, GameView.tileWidth, GameView.tileHeight);
+        lastTime = System.currentTimeMillis();
     }
 
     //Controls player location & flashlight radius
@@ -105,8 +109,11 @@ public class Player {
             coords[1] += direction[1] * speed;
         }
         //TODO: if doing battery, update radius of flashlight here
-        if(flashLightRadius > 1) {
-            flashLightRadius--;
+        if(charge > 0.05f && System.currentTimeMillis() - lastTime > 500) {
+            lastTime = System.currentTimeMillis();
+            charge -= 0.01f;
+            battery.setPercentage(charge);
+            flashLightRadius = (int)(charge * flashlight.getMaxRadius());
             flashlight.setRadius(flashLightRadius);
         }
         return coords;
@@ -213,8 +220,14 @@ public class Player {
     public int getRadius() {
         return flashLightRadius;
     }
-    public int getMaxRadius() {
-        return maxRadius;
+
+    public float getCharge() { return charge; }
+    public void updateCharge(float change) {
+        stopMoving();
+        if (charge + change > 1.0f) {
+            charge = 1.0f;
+        }
+        else charge += change;
     }
 
     public boolean hasKey() {

@@ -1,5 +1,8 @@
 package group7.scavengerhaunt;
 
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.BlurMaskFilter;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -59,19 +62,23 @@ public class Lights {
     public static class Flashlight extends Lights{
         //The base Circle with given radius. The light will be a sector of this
         private RectF circle;
+        //Flashlight's maximum radius
+        private int maxRadius;
+        //For gradient usage
         private int largerRadius;
         //Where the arc starts, where 270 is straight ahead
         private int startingAngle;
         //Theta of the sector, where 90 produces quarter of a circle
         private int sweepingAngle;
         private double direction[];
-        Paint radialGradientPaint;      //Causes normal light to fade out
-        Paint radialColorPaint;         //Causes blurred yellow light from source
-        RadialGradient gradient;        //Radial gradient shader effect
+        private Paint radialGradientPaint;      //Causes normal light to fade out
+        private Paint radialColorPaint;         //Causes blurred yellow light from source
+        private RadialGradient gradient;        //Radial gradient shader effect
 
         //x, y will correspond to player's center xy
         public Flashlight(int x, int y, int r, int startingAngle, int sweepingAngle, double[] direction) {
             super(x, y, r);
+            this.maxRadius = r;
             this.startingAngle = startingAngle;
             this.sweepingAngle = sweepingAngle;
             this.direction = direction;
@@ -154,5 +161,11 @@ public class Lights {
         public int getSweepingAngle() {
             return sweepingAngle;
         }
+
+        public int getMaxRadius() {
+            return maxRadius;
+        }
+
     }
+
 }

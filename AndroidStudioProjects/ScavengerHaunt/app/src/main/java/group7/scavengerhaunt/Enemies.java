@@ -47,9 +47,12 @@ public class Enemies {
         direction = new double[]{0, -1};
     }
 
-    public boolean detectCollision(int playerX, int playerY) {
-        //return Rect.intersects(playerHitBox, this.hitBox);
-        return playerX >= hitBox.left && playerX <= hitBox.right && playerY >= hitBox.top && playerY <= hitBox.bottom;
+//    public boolean detectCollision(int playerX, int playerY) {
+//        return playerX >= hitBox.left && playerX <= hitBox.right && playerY >= hitBox.top && playerY <= hitBox.bottom;
+//    }
+
+    public boolean detectCollision(Rect playerHitBox) {
+        return Rect.intersects(playerHitBox, this.hitBox);
     }
 
     public void drawEnemy(Canvas canvas, Paint paint) {

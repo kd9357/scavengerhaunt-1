@@ -3,6 +3,8 @@ package group7.scavengerhaunt;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
+import android.media.AudioManager;
+import android.media.SoundPool;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -10,6 +12,8 @@ import android.widget.ImageButton;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener{
 
+    public static SoundPool mSounds;
+    public static int mButtonPressID;
 
     private ImageButton buttonStageSelect;
     private ImageButton buttonHowToPlay;
@@ -47,6 +51,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View v) {
         //Go to stage select screen
         if(v==buttonStageSelect) {
+            if(mSoundOn) {
+                //MainActivity.mSounds.play(MainActivity.mButtonPressID, 1, 1, 1, 0, 1);
+            }
             startActivity(new Intent(this, StageSelectActivity.class));
         }//Go to how to play screen
         else if(v==buttonHowToPlay) {
@@ -55,6 +62,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         else if(v==buttonSettings) {
             Intent intent = new Intent(this, SettingsActivity.class);
             startActivityForResult(intent, SETTINGS_REQUEST);
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mSounds = new SoundPool(2, AudioManager.STREAM_MUSIC, 0);
+        mButtonPressID = mSounds.load(this, R.raw.sms_alert_1_daniel_simon, 1);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (mSounds != null) {
+            mSounds.release();
+            mSounds = null;
         }
     }
 

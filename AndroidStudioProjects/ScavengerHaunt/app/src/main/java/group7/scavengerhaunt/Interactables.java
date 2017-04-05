@@ -106,8 +106,9 @@ public class Interactables {
         private Bitmap empty;
         private float percentage;
 
-        public Battery(Context context, int x, int y, int tileWidth, int tileHeight) {
+        public Battery(Context context, float charge, int x, int y, int tileWidth, int tileHeight) {
             super(context, x, y);
+            percentage = charge;
             Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.battery_full);
             full = Bitmap.createScaledBitmap(temp, tileWidth, tileHeight, true);
             temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.battery_eighty);

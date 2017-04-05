@@ -10,12 +10,19 @@ import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static android.content.Context.SENSOR_SERVICE;
 
 
 /**
@@ -26,6 +33,7 @@ import java.util.List;
 public class GameView extends View implements Runnable {
     //Activity that runs the view
     private GameActivity gameActivity;
+    private SensorManager sensorMgr;
 
     private final int NUM_COLUMNS = 20;
     private final int NUM_ROWS = 12;
@@ -42,6 +50,14 @@ public class GameView extends View implements Runnable {
     //This variable is volatile for when the phone pauses or not
     volatile boolean playing;
 
+    // Used for recharge mechanic
+    private long lastChargeTime;
+    private long lastSpeedTime;
+    private boolean timeSet;
+    private float last_x;
+    private float last_y;
+    private float last_z;
+
     //Game thread
     private Thread gameThread = null;
 
@@ -53,7 +69,6 @@ public class GameView extends View implements Runnable {
 
     //Game Objects
     private Player player;
-    private Interactables.Battery battery;
     private Interactables.Door door;
     private Interactables.Key key;
     private List<Obstacles> obstacleList = new ArrayList<>();
@@ -81,6 +96,10 @@ public class GameView extends View implements Runnable {
 
     public void initialize(GameActivity g, int screenX, int screenY) {
         this.gameActivity = g;
+        sensorMgr = (SensorManager) context.getSystemService(SENSOR_SERVICE);
+        Sensor accelerometer = sensorMgr.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        sensorMgr.registerListener(sensorEventListener, accelerometer, SensorManager.SENSOR_DELAY_UI);
+
         tileWidth = screenX / NUM_COLUMNS;
         tileHeight = screenY / NUM_ROWS;
         screenMinX = tileWidth * 2;
@@ -121,7 +140,6 @@ public class GameView extends View implements Runnable {
         player = new Player(context, tileWidth * 18, tileHeight * 6, screenMinX, screenMinY, screenMaxX, screenMaxY, tileWidth * 2, tileHeight * 2);
         player.setDirection(-1, 0);
         //Create our interactables
-        battery = new Interactables.Battery(context, tileWidth/3, 0, tileWidth, tileHeight);
         door = new Interactables.Door(context, 0, tileHeight, tileWidth * 2, tileHeight * 2);
         key = new Interactables.Key(context, (int)(tileWidth * 2.5), tileHeight * 10, tileWidth, tileHeight);
         //Create our obstacles
@@ -139,6 +157,11 @@ public class GameView extends View implements Runnable {
             if(o.hasLight())
                 lightList.add(o.getLight());
         }
+
+        // Set battery recharge time
+        lastChargeTime = System.currentTimeMillis();
+        lastSpeedTime = lastChargeTime;
+        timeSet = false;
     }
 
     @Override
@@ -156,7 +179,7 @@ public class GameView extends View implements Runnable {
         //Update player location
         int[] newCoords = player.update();
         Lights.Flashlight f = player.getFlashLight();
-        battery.setPercentage((float)player.getRadius() / player.getMaxRadius());
+
         //Detect hitbox intersections
         obstacleCollision(newCoords[0], newCoords[1], f);
         enemyCollision(f);
@@ -198,7 +221,7 @@ public class GameView extends View implements Runnable {
                     }
                 }
             }
-            if(e.detectCollision(player.getCenterX(), player.getCenterY())) {
+            if(e.detectCollision(player.getHitBox())) {
                 playing = false;
                 gameFinished = true;
                 gameWon = false;
@@ -335,7 +358,7 @@ public class GameView extends View implements Runnable {
     }
 
     private void drawHUD(Canvas canvas) {
-        battery.drawInteractable(canvas, paint);
+        player.battery.drawInteractable(canvas, paint);
         if(player.hasKey()) {
             canvas.drawBitmap(key.getImage(), 3 * tileWidth / 2, 0, paint);
         }
@@ -357,6 +380,7 @@ public class GameView extends View implements Runnable {
     public void pause() {
         //When the game is paused
         playing = false;
+        sensorMgr.unregisterListener(sensorEventListener);
         //Stop the thread
         try {
             gameThread.join();
@@ -368,9 +392,49 @@ public class GameView extends View implements Runnable {
     public void resume() {
         //When the game is resumed
         playing = true;
+        Sensor accelerometer = sensorMgr.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        sensorMgr.registerListener(sensorEventListener, accelerometer, SensorManager.SENSOR_DELAY_UI);
         gameThread = new Thread(this);
         gameThread.start();
     }
+
+    private SensorEventListener sensorEventListener =
+            new SensorEventListener() {
+                @Override
+                public void onSensorChanged(SensorEvent event) {
+                    long curTime = System.currentTimeMillis();
+                    long diffTime = curTime - lastSpeedTime;
+
+                    if (diffTime > 100) {
+                        lastSpeedTime = curTime;
+                        float x = event.values[0];
+                        float y = event.values[1];
+                        float z = event.values[2];
+                        float speed = Math.abs(x+y+z - last_x - last_y - last_z) / diffTime * 1000;
+
+                        if (speed > 200) {
+                            if (!timeSet) {
+                                timeSet = true;
+                                lastChargeTime = curTime;
+                            }
+                            else if (curTime - lastChargeTime > 500) {
+                                player.updateCharge(0.20f);
+                                timeSet = false;
+                                Log.d("In GameView:", "RECHARGE!!!!!");
+                            }
+                        }
+
+                        last_x = x;
+                        last_y = y;
+                        last_z = z;
+                    }
+                }
+                @Override
+                public void onAccuracyChanged(Sensor sensor, int accuracy) {
+                    // Do nothing
+                }
+            };
+
 
     @Override
     public boolean onTouchEvent(MotionEvent motionEvent) {
