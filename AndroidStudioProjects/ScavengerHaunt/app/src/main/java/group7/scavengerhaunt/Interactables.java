@@ -96,4 +96,50 @@ public class Interactables {
             hitBox = new Rect(x + image.getWidth()/4, y, x + 3 *image.getWidth()/4, y + image.getHeight());
         }
     }
+
+    public static class Battery extends Interactables {
+        private Bitmap full;
+        private Bitmap eighty;
+        private Bitmap sixty;
+        private Bitmap forty;
+        private Bitmap twenty;
+        private Bitmap empty;
+        private float percentage;
+
+        public Battery(Context context, float charge, int x, int y, int tileWidth, int tileHeight) {
+            super(context, x, y);
+            percentage = charge;
+            Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.battery_full);
+            full = Bitmap.createScaledBitmap(temp, tileWidth, tileHeight, true);
+            temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.battery_eighty);
+            eighty = Bitmap.createScaledBitmap(temp, tileWidth, tileHeight, true);
+            temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.battery_sixty_green);
+            sixty = Bitmap.createScaledBitmap(temp, tileWidth, tileHeight, true);
+            temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.battery_forty);
+            forty = Bitmap.createScaledBitmap(temp, tileWidth, tileHeight, true);
+            temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.battery_twenty);
+            twenty = Bitmap.createScaledBitmap(temp, tileWidth, tileHeight, true);
+            temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.battery_empty);
+            empty = Bitmap.createScaledBitmap(temp, tileWidth, tileHeight, true);
+        }
+
+        public void drawInteractable(Canvas canvas, Paint paint) {
+            if(percentage > 0.8f)
+                canvas.drawBitmap(full, getX(), getY(), paint);
+            else if(percentage <= 0.8f && percentage > 0.65f)
+                canvas.drawBitmap(eighty, getX(), getY(), paint);
+            else if(percentage <= 0.65f && percentage > 0.5f)
+                canvas.drawBitmap(sixty, getX(), getY(), paint);
+            else if(percentage <= 0.5f && percentage > 0.3f)
+                canvas.drawBitmap(forty, getX(), getY(), paint);
+            else if(percentage <= 0.3f && percentage > 0.05f)
+                canvas.drawBitmap(twenty, getX(), getY(), paint);
+            else
+                canvas.drawBitmap(empty, getX(), getY(), paint);
+        }
+
+        public void setPercentage(float percentage) {
+            this.percentage = percentage;
+        }
+    }
 }

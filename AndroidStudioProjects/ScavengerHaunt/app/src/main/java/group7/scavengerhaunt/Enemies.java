@@ -33,8 +33,7 @@ public class Enemies {
     protected int speed;
     protected boolean moving = false;
 
-    protected int directionX;
-    protected int directionY;
+    protected double direction[];
     protected int patrolRoute;
     protected int distanceTraveled = 0;
 
@@ -45,11 +44,15 @@ public class Enemies {
     public Enemies(Context context, int x, int y) {
         this.x = x;
         this.y = y;
+        direction = new double[]{0, -1};
     }
 
-    public boolean detectCollision(int playerX, int playerY) {
-        //return Rect.intersects(playerHitBox, this.hitBox);
-        return playerX >= hitBox.left && playerX <= hitBox.right && playerY >= hitBox.top && playerY <= hitBox.bottom;
+//    public boolean detectCollision(int playerX, int playerY) {
+//        return playerX >= hitBox.left && playerX <= hitBox.right && playerY >= hitBox.top && playerY <= hitBox.bottom;
+//    }
+
+    public boolean detectCollision(Rect playerHitBox) {
+        return Rect.intersects(playerHitBox, this.hitBox);
     }
 
     public void drawEnemy(Canvas canvas, Paint paint) {
@@ -62,10 +65,10 @@ public class Enemies {
 
     public void update() {
         if(moving) {
-            setX(directionX * speed);
-            setY(directionY * speed);
+            setX((int)(x + direction[0] * speed));
+            setY((int)(y + direction[1] * speed));
             hitBox.offset(x, y);
-            distanceTraveled += directionX * speed + directionY * speed;
+            distanceTraveled += direction[0] * speed + direction[1] * speed;
         }
     }
 
@@ -79,11 +82,11 @@ public class Enemies {
         centerY = y + imageHeight / 2;
     }
 
-    public void setDirection(int xVector, int yVector) {
-        directionX = xVector;
-        directionY = yVector;
-        angleDegrees = (float) GameActivity.getAngle(directionX, directionY);
-        if(directionX < 0)
+    public void setDirection(double xVector, double yVector) {
+        direction[0] = xVector;
+        direction[1] = yVector;
+        angleDegrees = (float) GameActivity.getAngle(direction[0], direction[1]);
+        if(direction[0] < 0)
             angleDegrees = -angleDegrees;
     }
 
@@ -146,13 +149,13 @@ public class Enemies {
 
         public void update() {
             if(moving) {
-                setX(x + directionX * speed);
+                setX((int)(x + direction[0] * speed));
                 //setY(directionY * speed);
                 hitBox.offsetTo(x, y);
                 imageBox.offsetTo(x, y);
-                distanceTraveled += Math.abs(directionX * speed);
+                distanceTraveled += Math.abs(direction[0] * speed);
                 if(distanceTraveled >= patrolRoute) {
-                    setDirection(-directionX, directionY);
+                    setDirection(-direction[0], direction[1]);
                     distanceTraveled = 0;
                 }
             }
