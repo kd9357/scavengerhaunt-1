@@ -17,6 +17,8 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
     private static final String TAG = "Game Interface";
     private int SETTINGS_REQUEST = 1;
 
+    private int level;
+
     //Surface view of game
     private GameView gameView;
 
@@ -29,6 +31,11 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
+
+        Bundle b = getIntent().getExtras();
+        level = -1;
+        if(b != null)
+            level = b.getInt("level");
 
         //Display object
         Display display = getWindowManager().getDefaultDisplay();

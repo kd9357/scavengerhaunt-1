@@ -14,6 +14,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.media.MediaPlayer;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -231,8 +232,14 @@ public class GameView extends View implements Runnable {
     }
 
     private void interactablesCollision(Lights.Flashlight f) {
-        if(key.detectCollision(player.getCenterX(),player.getCenterY()))
+        if(key.detectCollision(player.getCenterX(),player.getCenterY()) && !player.hasKey()) {
+            if(MainActivity.mSoundOn) {
+                MediaPlayer player = MediaPlayer.create(context, R.raw.key_found);
+                player.setVolume(0.5f, 0.5f);
+                player.start();
+            }
             player.foundKey();
+        }
         Rect box = key.getImageBox();
         key.setIlluminated(f.detectCollision(box));
         if(!key.isIlluminated()) {

@@ -40,7 +40,9 @@ public class StageSelectActivity extends AppCompatActivity implements View.OnTou
         int xCoord = (int)event.getX();
         int yCoord = (int)event.getY();
         if(xCoord > 0 && xCoord < buttonSize && yCoord > 0 && yCoord < buttonSize) {
-            startActivity(new Intent(this, GameActivity.class));
+            Intent intent = new Intent(this, GameActivity.class);
+            //intent.putExtras("level", 1); //Will determine which level gameActivity should load
+            startActivity(intent);
         }
 
         //so we aren't notified of continued events when finger is moved
