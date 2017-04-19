@@ -19,6 +19,12 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 
     private int level;
 
+    public static final int NUM_COLUMNS = 20;
+    public static final int NUM_ROWS = 12;
+
+    public static int tileWidth;
+    public static int tileHeight;
+
     //Surface view of game
     private GameView gameView;
 
@@ -42,10 +48,18 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         //Get screen resolution
         Point size = new Point();
         display.getSize(size);
-        //SurfaceView
+        tileWidth = size.x / GameActivity.NUM_COLUMNS;
+        tileHeight = size.y / GameActivity.NUM_ROWS;
+
+        //Initialize game objects
+        Levels stage = new Levels(this, size.x, size.y);
+        stage.setStage(this, level);
+
+        //Initialize View
         gameView = (GameView) findViewById(R.id.game_view);
-        //Eventually, initialize will have more parameters for spawn locations etc
-        gameView.initialize(this, size.x, size.y);
+        //Load gameobjects onto view
+        //gameView.initialize(this, size.x, size.y);
+        gameView.initialize(this, stage);
 
         buttonSettingsGear = (ImageButton) findViewById(R.id.buttonSettingsGear);
         buttonSettingsGear.setOnClickListener(this);

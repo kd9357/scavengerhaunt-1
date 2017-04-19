@@ -55,6 +55,10 @@ public class Enemies {
         return Rect.intersects(playerHitBox, this.hitBox);
     }
 
+    public boolean detectCollision(int playerX, int playerY) {
+        return playerX >= hitBox.left && playerX <= hitBox.right && playerY >= hitBox.top && playerY <= hitBox.bottom;
+    }
+
     public void drawEnemy(Canvas canvas, Paint paint) {
         canvas.drawBitmap(getImage(), getX(), getY(), paint);
     }
@@ -134,7 +138,7 @@ public class Enemies {
         public Ghost (Context context, int x, int y, int scaleX, int scaleY) {
             super(context, x, y);
             Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.transparent_ghost);
-            image = Bitmap.createScaledBitmap(temp, GameView.tileWidth * scaleX, GameView.tileHeight * scaleY, true);
+            image = Bitmap.createScaledBitmap(temp, GameActivity.tileWidth * scaleX, GameActivity.tileHeight * scaleY, true);
             this.imageWidth = image.getWidth();
             this.imageHeight = image.getHeight();
             centerX = x + image.getWidth()/2;
@@ -142,7 +146,7 @@ public class Enemies {
             hitBox = new Rect(x, y, x+imageWidth, y+imageHeight);
             imageBox = new Rect(x, y, x+imageWidth, y+imageWidth);
             setDirection(-1, 0);
-            patrolRoute = GameView.tileWidth * 7;
+            patrolRoute = GameActivity.tileWidth * 7;
             moving = true;
             speed = 7;
         }

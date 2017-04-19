@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.util.Log;
 
 /**
  * Created by Kevin on 3/23/2017.
@@ -109,6 +110,7 @@ public class Interactables {
         public Battery(Context context, float charge, int x, int y, int tileWidth, int tileHeight) {
             super(context, x, y);
             percentage = charge;
+            Log.d("In battery", x + ", " + y + ", " + tileWidth + ", " + tileHeight);
             Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.battery_full);
             full = Bitmap.createScaledBitmap(temp, tileWidth, tileHeight, true);
             temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.battery_eighty);

@@ -87,7 +87,7 @@ public class Obstacles {
             super(context, x, y);
             //Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.table);
             Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.table_full);
-            image = Bitmap.createScaledBitmap(temp, GameView.tileWidth * scaleX, GameView.tileHeight * scaleY, true);
+            image = Bitmap.createScaledBitmap(temp, GameActivity.tileWidth * scaleX, GameActivity.tileHeight * scaleY, true);
             imageBox = new Rect(x, y, x+image.getWidth(), y+image.getHeight());
             hitBoxes.add(new Rect(x + image.getWidth() / 7, y + image.getHeight() / 6, x + 6 *image.getWidth() / 7, y + 3 * image.getHeight() / 4));
             hitBoxes.add(new Rect(x, y + image.getHeight() / 6, x + image.getWidth() / 6, y + image.getHeight()/2 ));
@@ -95,7 +95,7 @@ public class Obstacles {
             hitBoxes.add(new Rect(x + 5 *image.getWidth()/6, y + image.getHeight() / 6, x + image.getWidth(), y + 4 * image.getHeight() / 7));
             hasLight = true;
             illuminated = true;
-            light = new Lights(x + image.getWidth() * 47 / 100, y + image.getHeight() * 35 /100, GameView.tileWidth * 2);
+            light = new Lights(x + image.getWidth() * 47 / 100, y + image.getHeight() * 35 /100, GameActivity.tileWidth * 2);
         }
 
         public boolean detectCollision(int playerX, int playerY) {
@@ -117,7 +117,7 @@ public class Obstacles {
         public LoungeChair(Context context, int x, int y, int scaleX, int scaleY) {
             super(context, x, y);
             Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.lounge_chair);
-            image = Bitmap.createScaledBitmap(temp, GameView.tileWidth * scaleX, GameView.tileHeight * scaleY, true);
+            image = Bitmap.createScaledBitmap(temp, GameActivity.tileWidth * scaleX, GameActivity.tileHeight * scaleY, true);
             imageBox = new Rect(x, y, x+image.getWidth(), y+image.getHeight());
             hitBox = new Rect(x, y, x + image.getWidth(), y + image.getHeight());
         }
@@ -127,47 +127,11 @@ public class Obstacles {
         public Box(Context context, int x, int y, int scaleX, int scaleY) {
             super(context, x, y);
             Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.boxes);
-            image = Bitmap.createScaledBitmap(temp, GameView.tileWidth * scaleX, GameView.tileHeight * scaleY, true);
+            image = Bitmap.createScaledBitmap(temp, GameActivity.tileWidth * scaleX, GameActivity.tileHeight * scaleY, true);
             imageBox = new Rect(x, y, x+image.getWidth(), y+image.getHeight());
             hitBox = new Rect(x, y, x + image.getWidth(), y + image.getHeight());
         }
     }
-
-//    public static class SeatOne extends Obstacles {
-//        public SeatOne(Context context, int x, int y, int scaleX, int scaleY) {
-//            super(context, x, y);
-//            Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.seat_1);
-//            image = Bitmap.createScaledBitmap(temp, GameView.tileWidth * scaleX, GameView.tileHeight * scaleY, true);
-//            hitBox = new Rect(x, y + image.getHeight() / 2, x + image.getWidth(), y + image.getHeight());
-//        }
-//    }
-//
-//    public static class SeatTwo extends Obstacles {
-//        public SeatTwo(Context context, int x, int y, int scaleX, int scaleY) {
-//            super(context, x, y);
-//            Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.seat_2);
-//            image = Bitmap.createScaledBitmap(temp, GameView.tileWidth * scaleX, GameView.tileHeight * scaleY, true);
-//            hitBox = new Rect(x, y, x + 5 * image.getWidth() / 4, y + 5 * image.getHeight() / 4);
-//        }
-//    }
-//
-//    public static class SeatThree extends Obstacles {
-//        public SeatThree(Context context, int x, int y, int scaleX, int scaleY) {
-//            super(context, x, y);
-//            Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.seat_3);
-//            image = Bitmap.createScaledBitmap(temp, (int)(GameView.tileWidth * (scaleX + 0.5)), (int)(GameView.tileHeight * (scaleY + 0.6)), true);
-//            hitBox = new Rect(x, y, x + image.getWidth(), y + 3 * image.getHeight() / 5);
-//        }
-//    }
-//
-//    public static class SeatFour extends Obstacles {
-//        public SeatFour(Context context, int x, int y, int scaleX, int scaleY) {
-//            super(context, x, y);
-//            Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.seat_4);
-//            image = Bitmap.createScaledBitmap(temp, GameView.tileWidth * scaleX, (int)(GameView.tileHeight * (scaleY + 0.5)), true);
-//            hitBox = new Rect(x, y, x + image.getWidth(), y + image.getHeight());
-//        }
-//    }
 
     //The fireplace is a triangle, not a rectangle hitbox
     public static class Fireplace extends Obstacles {
@@ -179,17 +143,17 @@ public class Obstacles {
         public Fireplace(Context context, int x, int y, int scaleX, int scaleY) {
             super(context, x, y);
             Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.fireplace_complete);
-            image = Bitmap.createScaledBitmap(temp, GameView.tileWidth * scaleX, GameView.tileHeight * scaleY, true);
+            image = Bitmap.createScaledBitmap(temp, GameActivity.tileWidth * scaleX, GameActivity.tileHeight * scaleY, true);
             imageBox = new Rect(x, y, x+image.getWidth(), y+image.getHeight());
-            p1[0] = (float)x - GameView.tileWidth;
+            p1[0] = (float)x - GameActivity.tileWidth;
             p1[1] = (float)y;
             p2[0] = (float)(x + image.getWidth());
             p2[1] = (float)y;
             p3[0] = (float)(x + image.getWidth());
-            p3[1] = (float)(y + image.getHeight() + GameView.tileHeight);
+            p3[1] = (float)(y + image.getHeight() + GameActivity.tileHeight);
             hasLight = true;
             illuminated = true;
-            light = new Lights(x + image.getWidth() * 3 / 5, y + image.getHeight() / 3, GameView.tileWidth * (scaleX * 2) / 3);
+            light = new Lights(x + image.getWidth() * 3 / 5, y + image.getHeight() / 3, GameActivity.tileWidth * (scaleX * 2) / 3);
         }
 
         //Calculating Barycentric coordinates (flashbacks to computer graphics)

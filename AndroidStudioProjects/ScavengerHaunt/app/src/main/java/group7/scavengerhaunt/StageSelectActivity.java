@@ -3,6 +3,7 @@ package group7.scavengerhaunt;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Resources;
+import android.media.MediaPlayer;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -39,24 +40,25 @@ public class StageSelectActivity extends AppCompatActivity implements View.OnTou
         buttonSize = mStageView.getWidth() / 5;
         int xCoord = (int)event.getX();
         int yCoord = (int)event.getY();
-        if(xCoord > 0 && xCoord < buttonSize && yCoord > 0 && yCoord < buttonSize) {
-            Intent intent = new Intent(this, GameActivity.class);
-            //intent.putExtras("level", 1); //Will determine which level gameActivity should load
-            startActivity(intent);
+        if(xCoord > 0 && xCoord < mStageView.getWidth() && yCoord > 0 && yCoord < mStageView.getHeight()) {
+            int stageNum = xCoord / buttonSize + yCoord / buttonSize;
+            if(mStages[stageNum] == 1) {
+                if(MainActivity.mSoundOn) {
+                    MediaPlayer player = MediaPlayer.create(this, R.raw.button_pressed);
+                    player.start();
+                }
+                Intent intent = new Intent(this, GameActivity.class);
+                intent.putExtra("level", stageNum);
+                startActivity(intent);
+            }
         }
+//        if(xCoord > 0 && xCoord < buttonSize && yCoord > 0 && yCoord < buttonSize) {
+//            Intent intent = new Intent(this, GameActivity.class);
+//            intent.putExtra("level", 0); //Will determine which level gameActivity should load
+//            startActivity(intent);
+//        }
 
         //so we aren't notified of continued events when finger is moved
         return false;
-    }
-
-    //Used to calculate screen location
-    public static int dpToPx(int dp)
-    {
-        return (int) (dp * Resources.getSystem().getDisplayMetrics().density);
-    }
-
-    public static int spToPx(int sp)
-    {
-        return (int) (sp * Resources.getSystem().getDisplayMetrics().scaledDensity);
     }
 }

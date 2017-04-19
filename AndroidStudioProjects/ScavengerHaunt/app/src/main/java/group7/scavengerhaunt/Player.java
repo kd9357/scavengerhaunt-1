@@ -93,7 +93,7 @@ public class Player {
         flashlight = new Lights.Flashlight(x + flashLightXOffset, y + flashLightYOffset, flashLightRadius, startingAngle, sweepingAngle, getDirection());
         selflight = new Lights(centerX, centerY, selfLightRadius);
         charge = 1.0f;
-        battery = new Interactables.Battery(context, charge, GameView.tileWidth /3, 0, GameView.tileWidth, GameView.tileHeight);
+        battery = new Interactables.Battery(context, charge, GameActivity.tileWidth /3, 0, GameActivity.tileWidth, GameActivity.tileHeight);
         lastTime = System.currentTimeMillis();
     }
 
@@ -108,12 +108,12 @@ public class Player {
             coords[0] += direction[0] * speed;
             coords[1] += direction[1] * speed;
         }
-        //TODO: if doing battery, update radius of flashlight here
-        if(charge > 0.05f && System.currentTimeMillis() - lastTime > 500) {
+        if (charge > 0.05f && System.currentTimeMillis() - lastTime > 500) {
             lastTime = System.currentTimeMillis();
-            charge -= 0.01f;
+            if(!MainActivity.mDebugModeOn)
+                charge -= 0.01f;
             battery.setPercentage(charge);
-            flashLightRadius = (int)(charge * flashlight.getMaxRadius());
+            flashLightRadius = (int) (charge * flashlight.getMaxRadius());
             flashlight.setRadius(flashLightRadius);
         }
         return coords;
@@ -222,6 +222,7 @@ public class Player {
     }
 
     public float getCharge() { return charge; }
+
     public void updateCharge(float change) {
         stopMoving();
         if (charge + change > 1.0f) {
