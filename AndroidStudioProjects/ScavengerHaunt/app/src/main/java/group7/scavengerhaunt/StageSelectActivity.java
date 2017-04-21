@@ -1,16 +1,12 @@
 package group7.scavengerhaunt;
 
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
-import android.content.res.Resources;
 import android.media.MediaPlayer;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.ImageButton;
-import android.widget.TextView;
 
 public class StageSelectActivity extends AppCompatActivity implements View.OnTouchListener{
 
@@ -18,7 +14,7 @@ public class StageSelectActivity extends AppCompatActivity implements View.OnTou
     private StageView mStageView;
 
     //Must persist on application close
-    private int[] mStages = {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    private int[] mStages = {1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0};
 
     private int buttonSize;
 
@@ -52,11 +48,6 @@ public class StageSelectActivity extends AppCompatActivity implements View.OnTou
                 startActivity(intent);
             }
         }
-//        if(xCoord > 0 && xCoord < buttonSize && yCoord > 0 && yCoord < buttonSize) {
-//            Intent intent = new Intent(this, GameActivity.class);
-//            intent.putExtra("level", 0); //Will determine which level gameActivity should load
-//            startActivity(intent);
-//        }
 
         //so we aren't notified of continued events when finger is moved
         return false;

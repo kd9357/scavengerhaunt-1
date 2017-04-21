@@ -44,15 +44,33 @@ public class Levels {
         Bitmap temp;
         switch(stageNum) {
             case 0:
+                screenMinX = tileWidth;
+                screenMinY = tileHeight * 2;
+                temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.background_full_0);
+                background = Bitmap.createScaledBitmap(temp, screenMaxX, screenMaxY, true);
+                player = new Player(context, tileWidth * 18, tileHeight * 3, screenMinX, screenMinY, screenMaxX, screenMaxY, (int)(tileWidth * 2.5), (int)(tileHeight * 2.5));
+                player.setDirection(-1, 0);
+                door = new Interactables.Door(context, tileWidth * 4, 0, tileWidth * 2, tileHeight * 2, true);
+                key = new Interactables.Key(context, tileWidth * 18, tileHeight * 10, tileWidth, tileHeight);
+                obstacleList.add(new Obstacles.WoodTable(context, tileWidth * 13, tileHeight * 7, 6, 3, true));
+                obstacleList.add(new Obstacles.LoungeChair(context, tileWidth * 4, tileHeight * 7, 4, 4));
+                lightList.add(player.getSelfLight());
+                //Wall sconce
+                Lights l = new Lights(tileWidth * 7, tileHeight, GameActivity.tileWidth * 2);
+                lightList.add(l);
+                l = new Lights(tileWidth * 3, tileHeight * 10, GameActivity.tileWidth * 3);
+                lightList.add(l);
+                break;
+            case 1:
                 screenMinX = tileWidth * 2;
                 screenMinY = 0;
                 temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.background_full);
                 background = Bitmap.createScaledBitmap(temp, screenMaxX, screenMaxY, true);
                 //Context, startX, startY, screenX min, screenY min, screenX max, screenY max, width of player, width of height
-                player = new Player(context, tileWidth * 18, tileHeight * 6, screenMinX, screenMinY, screenMaxX, screenMaxY, tileWidth * 2, tileHeight * 2);
+                player = new Player(context, tileWidth * 18, tileHeight * 6, screenMinX, screenMinY, screenMaxX, screenMaxY, (int)(tileWidth * 2.5), (int)(tileHeight * 2.5));
                 player.setDirection(-1, 0);
                 //Create our interactables
-                door = new Interactables.Door(context, 0, tileHeight, tileWidth * 2, tileHeight * 2);
+                door = new Interactables.Door(context, 0, tileHeight, tileWidth * 2, tileHeight * 2, false);
                 key = new Interactables.Key(context, (int)(tileWidth * 2.5), tileHeight * 10, tileWidth, tileHeight);
                 //Create our obstacles
                 obstacleList.add(new Obstacles.Table(context, tileWidth * 2, tileHeight *  4, 7, 7));
@@ -60,8 +78,32 @@ public class Levels {
                 obstacleList.add(new Obstacles.Box(context, tileWidth * 3, 0, 3, 2));
                 obstacleList.add(new Obstacles.Fireplace(context, tileWidth *15, 0, 6, 5));
                 //Create our enemies
-                enemyList.add(new Enemies.Ghost(context, tileWidth * 12, tileHeight * 2, 3, 3));
+                Enemies.Zombie z1 = new Enemies.Zombie(context, tileWidth * 12, tileHeight * 2, 3, 3);
+                z1.setPath(GameActivity.tileWidth * 7);
+                //enemyList.add(new Enemies.Zombie(context, tileWidth * 12, tileHeight * 2, 3, 3));
+                enemyList.add(z1);
                 //Create our lights
+                lightList.add(player.getSelfLight());
+                for(Obstacles o : obstacleList) {
+                    if(o.hasLight())
+                        lightList.add(o.getLight());
+                }
+                break;
+            case 2:
+                screenMinX = tileWidth;
+                screenMinY = tileHeight * 2;
+                temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.background_full_2);
+                background = Bitmap.createScaledBitmap(temp, screenMaxX, screenMaxY, true);
+                player = new Player(context, tileWidth * 18, tileHeight * 9, screenMinX, screenMinY, screenMaxX, screenMaxY, (int)(tileWidth * 2.5), (int)(tileHeight * 2.5));
+                player.setDirection(-1, 0);
+                door = new Interactables.Door(context, tileWidth * 16, 0, tileWidth * 2, tileHeight * 2, true);
+                key = new Interactables.Key(context, (int)(tileWidth * 2.5), tileHeight * 3, tileWidth, tileHeight);
+                obstacleList.add(new Obstacles.ClothTable(context, tileWidth * 5, tileHeight * 2, 3, 7));
+                obstacleList.add(new Obstacles.WoodTable(context, tileWidth * 12, tileHeight * 7, 6, 3, false));
+                Enemies.Zombie z2 = new Enemies.Zombie(context, tileWidth * 2, tileHeight * 9, 3, 3);
+                z2.setPath(GameActivity.tileWidth * 9);
+                z2.setDirection(1, 0);
+                enemyList.add(z2);
                 lightList.add(player.getSelfLight());
                 for(Obstacles o : obstacleList) {
                     if(o.hasLight())

@@ -37,6 +37,10 @@ public class Obstacles {
         return playerX >= hitBox.left && playerX <= hitBox.right && playerY >= hitBox.top && playerY <= hitBox.bottom;
     }
 
+    public boolean detectCollision(Rect playerHitBox) {
+        return Rect.intersects(playerHitBox, this.hitBox);
+    }
+
     public void drawObstacle(Canvas canvas, Paint paint) {
         canvas.drawBitmap(getImage(), getX(), getY(), paint);
     }
@@ -110,6 +114,33 @@ public class Obstacles {
             for(Rect hitBox : hitBoxes) {
                 canvas.drawRect(hitBox, paint);
             }
+        }
+    }
+
+    public static class ClothTable extends Obstacles {
+        public ClothTable(Context context, int x, int y, int scaleX, int scaleY) {
+            super(context, x, y);
+            Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.long_table_with_cloth);
+            image = Bitmap.createScaledBitmap(temp, GameActivity.tileWidth * scaleX, GameActivity.tileHeight * scaleY, true);
+            imageBox = new Rect(x, y, x+image.getWidth(), y+image.getHeight());
+            hitBox = new Rect(x, y, x + image.getWidth(), y + image.getHeight());
+            hasLight = true;
+            illuminated = true;
+            light = new Lights(x + image.getWidth() * 47 / 100, y + image.getHeight() * 35 /100, GameActivity.tileWidth * 2);
+        }
+    }
+
+    public static class WoodTable extends Obstacles {
+        public WoodTable(Context context, int x, int y, int scaleX, int scaleY, boolean empty) {
+            super(context, x, y);
+            Bitmap temp;
+            if(empty)
+                temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.long_table_wooden_blank);
+            else
+                temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.long_table_wooden);
+            image = Bitmap.createScaledBitmap(temp, GameActivity.tileWidth * scaleX, GameActivity.tileHeight * scaleY, true);
+            imageBox = new Rect(x, y, x+image.getWidth(), y+ image.getHeight());
+            hitBox = new Rect(x, y, x + image.getWidth(), y + 5 * image.getHeight() / 6);
         }
     }
 

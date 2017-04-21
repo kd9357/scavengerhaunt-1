@@ -47,7 +47,7 @@ public class Player {
     private double angleDegrees = 0;
 
     //Movement speed
-    private int speed = 10;
+    private float speed;
     private boolean moving = false;
 
     //Attached Lights
@@ -61,7 +61,8 @@ public class Player {
     private int sweepingAngle;
 
     Interactables.Battery battery;
-    private long lastTime;
+    private long lastTime;  //For battery
+    private long movementTime;  //For movement
     private float charge;
     //Has key?
     private boolean hasKey = false;
@@ -80,33 +81,41 @@ public class Player {
         direction = new double[]{0, -1};
         updateX(startX);
         updateY(startY);
-        hitBox = new Rect(x, y, x + imageWidth, y + imageHeight);
+        hitBox = new Rect(x + imageWidth / 5, y + imageWidth / 5, x + 4 * imageWidth / 5, y + 4 * imageHeight / 5);
         screenMaxX = screenX - imageWidth;
         screenMaxY = screenY - imageHeight;
         //Create flashlight
         flashLightRadius = tileWidth * 3;
-        selfLightRadius = 3 * imageWidth / 5;
+        selfLightRadius = 55 * imageWidth / 100;
         startingAngle = 243;
         sweepingAngle = 54;
-        flashLightXOffset = imageWidth/8;
-        flashLightYOffset = imageHeight/8;
+        flashLightXOffset = 22 * imageWidth / 100;
+        flashLightYOffset = imageHeight/9;
         flashlight = new Lights.Flashlight(x + flashLightXOffset, y + flashLightYOffset, flashLightRadius, startingAngle, sweepingAngle, getDirection());
         selflight = new Lights(centerX, centerY, selfLightRadius);
         charge = 1.0f;
         battery = new Interactables.Battery(context, charge, GameActivity.tileWidth /3, 0, GameActivity.tileWidth, GameActivity.tileHeight);
         lastTime = System.currentTimeMillis();
+        movementTime = System.currentTimeMillis();
+        speed = GameActivity.tileWidth / 10f;
     }
 
     //Controls player location & flashlight radius
     public int[] update() {
         int[] coords = {this.centerX, this.centerY};
+        float deltaTime = (System.currentTimeMillis() - movementTime);
+        deltaTime /= 33.3f;
+        Log.d("deltaTime", "time is " + deltaTime);
+        movementTime = System.currentTimeMillis();
         if(moving) {
             //Set orientation
             angleDegrees = (float) GameActivity.getAngle(direction[0], direction[1]);
             if(direction[0] < 0)
                 angleDegrees = -angleDegrees;
-            coords[0] += direction[0] * speed;
-            coords[1] += direction[1] * speed;
+//            coords[0] += direction[0] * speed * deltaTime;
+//            coords[1] += direction[1] * speed * deltaTime;
+            coords[0] += direction[0] * GameActivity.tileWidth / 10f * deltaTime;
+            coords[1] += direction[1] * GameActivity.tileWidth / 10f * deltaTime;
         }
         if (charge > 0.05f && System.currentTimeMillis() - lastTime > 500) {
             lastTime = System.currentTimeMillis();
@@ -121,6 +130,8 @@ public class Player {
 
     //Sets player location
     public void setLocation(int newX, int newY) {
+        int deltaX = newX - x;
+        int deltaY = newY - y;
         updateX(newX - imageWidth/2);
         updateY(newY - imageHeight/2);
 
@@ -139,7 +150,7 @@ public class Player {
         else if(centerY < screenMinY)
             updateY(screenMinY - imageHeight/2);
 
-        hitBox.offsetTo(x, y);
+        hitBox.offsetTo(x + imageWidth / 4, y + imageHeight / 4);
         flashlight.setCircle(x + flashLightXOffset, y + flashLightYOffset, flashLightRadius);
         flashlight.setDirection(getDirection());
         selflight.setCircle(centerX, centerY, selfLightRadius);

@@ -55,10 +55,6 @@ public class Enemies {
         return Rect.intersects(playerHitBox, this.hitBox);
     }
 
-    public boolean detectCollision(int playerX, int playerY) {
-        return playerX >= hitBox.left && playerX <= hitBox.right && playerY >= hitBox.top && playerY <= hitBox.bottom;
-    }
-
     public void drawEnemy(Canvas canvas, Paint paint) {
         canvas.drawBitmap(getImage(), getX(), getY(), paint);
     }
@@ -134,35 +130,57 @@ public class Enemies {
         return imageBox;
     }
 
-    public static class Ghost extends Enemies {
-        public Ghost (Context context, int x, int y, int scaleX, int scaleY) {
+    public static class Zombie extends Enemies {
+        private Rect verticalHitBox;
+        private Rect horizontalHitBox;
+        private boolean movingHorizontally;
+        public Zombie (Context context, int x, int y, int scaleX, int scaleY) {
             super(context, x, y);
-            Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.transparent_ghost);
+            Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.zombie);
             image = Bitmap.createScaledBitmap(temp, GameActivity.tileWidth * scaleX, GameActivity.tileHeight * scaleY, true);
             this.imageWidth = image.getWidth();
             this.imageHeight = image.getHeight();
             centerX = x + image.getWidth()/2;
             centerY = y + image.getHeight()/2;
-            hitBox = new Rect(x, y, x+imageWidth, y+imageHeight);
+            //hitBox = new Rect(x + imageWidth / 5, y + imageHeight / 5, x+ 4 * imageWidth / 5, y+ 4 * imageHeight / 5);
+            verticalHitBox = new Rect(x + imageWidth / 6, y + imageHeight / 5, x+ 5 * imageWidth / 6, y+ 4 * imageHeight / 5);
+            horizontalHitBox = new Rect(x + imageWidth / 5, y + imageHeight/ 6, x+ 4 * imageWidth / 5, y+ 5 * imageHeight / 6);
             imageBox = new Rect(x, y, x+imageWidth, y+imageWidth);
             setDirection(-1, 0);
-            patrolRoute = GameActivity.tileWidth * 7;
+            //Going left/right
+            movingHorizontally = Math.abs(direction[0]) > Math.abs(direction[1]);
+            if(movingHorizontally)
+                setHitBox(horizontalHitBox);
+            else
+                setHitBox(verticalHitBox);
             moving = true;
-            speed = 7;
+            speed = (int)(GameActivity.tileWidth / 10f);
         }
 
         public void update() {
             if(moving) {
                 setX((int)(x + direction[0] * speed));
-                //setY(directionY * speed);
-                hitBox.offsetTo(x, y);
+                setY((int)(y + direction[1] * speed));
+                if(movingHorizontally)
+                    hitBox.offsetTo(x + imageWidth / 5, y + imageHeight / 6);
+                else
+                    hitBox.offsetTo(x + imageWidth / 6, y + imageHeight / 5);
                 imageBox.offsetTo(x, y);
-                distanceTraveled += Math.abs(direction[0] * speed);
+                distanceTraveled += Math.abs((int)(direction[0] * speed));
+                //distanceTraveled += Math.abs((int) (direction[1] * speed));
                 if(distanceTraveled >= patrolRoute) {
-                    setDirection(-direction[0], direction[1]);
+                    setDirection(-direction[0], -direction[1]);
                     distanceTraveled = 0;
                 }
             }
+        }
+
+        public void setPath(int distance) {
+            patrolRoute = distance;
+        }
+
+        public void setHitBox(Rect newHitBox) {
+            hitBox = newHitBox;
         }
 
     }

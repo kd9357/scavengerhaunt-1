@@ -171,8 +171,9 @@ public void initialize(GameActivity g, Levels gameObjects) {
         //If collision detected, reset coords
         for(Obstacles o : obstacleList) {
             Rect box = o.getImageBox();
-            o.setIlluminated(f.detectCollision(box));
-            if(!o.isIlluminated() || !o.hasLight()) {
+            //Illuminate obstacle if collides with flashlight || light attached to it
+            o.setIlluminated(f.detectCollision(box) || o.hasLight());
+            if(!o.isIlluminated()) {
                 for (Lights l : lightList) {
                     if (l.detectCollision(box)) {
                         o.setIlluminated(true);
@@ -202,8 +203,8 @@ public void initialize(GameActivity g, Levels gameObjects) {
                     }
                 }
             }
-            //if(e.detectCollision(player.getHitBox())) {
-            if(e.detectCollision(player.getCenterX(), player.getCenterY())) {
+            if(e.detectCollision(player.getHitBox())) {
+            //if(e.detectCollision(player.getCenterX(), player.getCenterY())) {
                 playing = false;
                 gameFinished = true;
                 gameWon = false;
@@ -279,12 +280,12 @@ public void initialize(GameActivity g, Levels gameObjects) {
     }
 
     private void drawInteractables(Canvas canvas) {
-        if(!player.hasKey() && (key.isIlluminated())) {
+        if((!player.hasKey() && key.isIlluminated()) || (MainActivity.mDebugModeOn && !player.hasKey())) {
             key.drawInteractable(canvas, paint);
-            if(MainActivity.mDebugModeOn)
+            if(MainActivity.mDebugModeOn && !player.hasKey())
                 key.drawHitBox(canvas, hitBoxPaint);
         }
-        if(door.isIlluminated())
+        if(door.isIlluminated() || MainActivity.mDebugModeOn)
             door.drawInteractable(canvas, paint);
         if(MainActivity.mDebugModeOn) {
             door.drawHitBox(canvas, hitBoxPaint);
@@ -294,7 +295,7 @@ public void initialize(GameActivity g, Levels gameObjects) {
 
     private void drawObstacles(Canvas canvas) {
         for (Obstacles o : obstacleList) {
-            if(o.illuminated)
+            if(o.illuminated || MainActivity.mDebugModeOn)
                 o.drawObstacle(canvas, paint);
             if(MainActivity.mDebugModeOn)
                 o.drawHitBox(canvas, hitBoxPaint);
@@ -312,7 +313,7 @@ public void initialize(GameActivity g, Levels gameObjects) {
 
     private void drawEnemies(Canvas canvas) {
         for(Enemies e : enemyList) {
-            if(e.illuminated) {
+            if(e.illuminated || MainActivity.mDebugModeOn) {
                 canvas.save();
                 canvas.rotate((float) e.getAngleDegrees(), e.getCenterX(), e.getCenterY());
                 e.drawEnemy(canvas, paint);
