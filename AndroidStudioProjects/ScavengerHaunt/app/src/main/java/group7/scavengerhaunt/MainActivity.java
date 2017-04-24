@@ -116,8 +116,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         //Called when Settings has been exited
         if(requestCode == SETTINGS_REQUEST) {
-            Log.d("MainActivity", "Settings updated");
-            //SharedPreferences sharedPref = getPreferences(MODE_PRIVATE);
             SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
             mSoundOn = sharedPref.getBoolean("sound", true);
             mSoftShadowsOn = sharedPref.getBoolean("shadows", true);

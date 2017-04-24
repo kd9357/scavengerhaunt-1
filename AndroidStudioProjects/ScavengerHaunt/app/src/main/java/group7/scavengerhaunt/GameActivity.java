@@ -4,6 +4,7 @@ import android.app.FragmentManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Point;
+import android.os.Parcelable;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -11,6 +12,9 @@ import android.util.Log;
 import android.view.Display;
 import android.view.View;
 import android.widget.ImageButton;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class GameActivity extends AppCompatActivity implements View.OnClickListener{
 
@@ -31,6 +35,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
     private ImageButton buttonSettingsGear;
     //Is the game over or not?
     private boolean mGameOver;
+    public FragmentManager fm;
 
     //TODO: add variables for gameview, hud, enemy type/locations, etc
     @Override
@@ -43,7 +48,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         if(b != null)
             level = b.getInt("level");
 
-        //Display object
+        //Display object, get screen size
         Display display = getWindowManager().getDefaultDisplay();
         //Get screen resolution
         Point size = new Point();
@@ -64,6 +69,8 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         buttonSettingsGear = (ImageButton) findViewById(R.id.buttonSettingsGear);
         buttonSettingsGear.setOnClickListener(this);
 
+        fm = getFragmentManager();
+
         setInstanceVarsFromSharedPrefs();
     }
 
@@ -72,6 +79,15 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         FragmentManager fm = getFragmentManager();
         EndGameFragment f = new EndGameFragment();
         f.show(fm, "end");
+    }
+
+    //Set next stage to be unlocked, and return next stage
+    public int unlockStage(boolean won) {
+        if(level + 1 < StageSelectActivity.mStages.length && won) {
+            StageSelectActivity.mStages[level + 1] = 1;
+            return level + 1;
+        }
+        return -1;
     }
 
     //Pause activity
@@ -113,6 +129,53 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         MainActivity.mSoundOn = sharedPref.getBoolean("sound", true);
         MainActivity.mSoftShadowsOn = sharedPref.getBoolean("shadows", true);
         MainActivity.mDebugModeOn = sharedPref.getBoolean("debug", false);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+
+        Player player = gameView.getPlayer();
+        ArrayList<Enemies> enemyList = (ArrayList)gameView.getEnemyList();
+        //Metadata
+        outState.putIntArray("mStages", StageSelectActivity.mStages);
+
+        outState.putBoolean("gameWon", gameView.hasWon());
+        outState.putBoolean("gameFinished", gameView.hasFinished());
+        //Player information
+        outState.putBoolean("hasKey", player.hasKey());
+        outState.putDoubleArray("direction", player.getDirection());
+        outState.putIntArray("position", new int[]{player.getX(), player.getY()});
+        //Log.d("LOCATION", "Location is (" + player.getX() + "," + player.getY() + ")");
+        outState.putFloat("battery", player.getCharge());
+        //Enemy information
+        outState.putParcelableArrayList("enemies", enemyList);
+
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    public void onRestoreInstanceState(Bundle savedInstanceState) {
+        // Always call the superclass so it can restore the view hierarchy
+        super.onRestoreInstanceState(savedInstanceState);
+
+        StageSelectActivity.mStages = savedInstanceState.getIntArray("mStages");
+        boolean playerDead = (!savedInstanceState.getBoolean("gameWon") && savedInstanceState.getBoolean("gameFinished"));
+        if (!playerDead) {
+            boolean hasKey = savedInstanceState.getBoolean("hasKey");
+            double[] direction = savedInstanceState.getDoubleArray("direction");
+            int[] position = savedInstanceState.getIntArray("position");
+            float battery = savedInstanceState.getFloat("battery");
+            Player player = gameView.getPlayer();
+            if (hasKey)
+                player.foundKey();
+            player.setDirection(direction[0], direction[1]);
+            player.newLocation(position[0], position[1]);
+            player.setCharge(battery);
+            gameView.setPlayer(player);
+        }
+
+        //List<Enemies> enemyList = savedInstanceState.getParcelable("enemyList");
+        //gameView.setEnemyList(enemyList);
     }
 
     @Override

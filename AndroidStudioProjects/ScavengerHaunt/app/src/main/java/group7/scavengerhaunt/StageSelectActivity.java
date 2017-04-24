@@ -1,7 +1,10 @@
 package group7.scavengerhaunt;
 
+import android.app.FragmentManager;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.media.MediaPlayer;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -14,21 +17,25 @@ public class StageSelectActivity extends AppCompatActivity implements View.OnTou
     private StageView mStageView;
 
     //Must persist on application close
-    private int[] mStages = {1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0};
+    public static int[] mStages = new int[11];
 
     private int buttonSize;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_stage_select);
 
+        //mStages = new int[]{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+        restoreStages();
         //Using Canvas to display buttons
         mStageView = (StageView) findViewById(R.id.stageView);
         //Grab saved data here
         mStageView.setStages(mStages);
         mStageView.setOnTouchListener(this);
     }
+
 
     public boolean onTouch(View v, MotionEvent event) {
         //TODO: Calculate which item touched given xy coordinates
@@ -51,5 +58,45 @@ public class StageSelectActivity extends AppCompatActivity implements View.OnTou
 
         //so we aren't notified of continued events when finger is moved
         return false;
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putIntArray("mStages", StageSelectActivity.mStages);
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        for (int i = 1; i < mStages.length; i++) {
+            editor.putInt("stage" + i, mStages[i]);
+        }
+        editor.apply();
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    public void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        restoreStages();
+        //StageSelectActivity.mStages = savedInstanceState.getIntArray("mStages");
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        for (int i = 1; i < mStages.length; i++) {
+            editor.putInt("stage" + i, mStages[i]);
+        }
+        editor.apply();
+    }
+
+
+    private void restoreStages() {
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        mStages[0] = 1;
+        for(int i = 1; i < mStages.length; i++) {
+            mStages[i] = sharedPref.getInt("stage" + i, 0);
+        }
     }
 }

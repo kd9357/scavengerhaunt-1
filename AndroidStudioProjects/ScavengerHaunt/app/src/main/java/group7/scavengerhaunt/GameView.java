@@ -1,5 +1,7 @@
 package group7.scavengerhaunt;
 
+import android.app.DialogFragment;
+import android.app.FragmentManager;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -153,7 +155,11 @@ public void initialize(GameActivity g, Levels gameObjects) {
             postInvalidate();
             controlFrameRate();
         }
-        //TODO: if using dialog to end game handle here
+        //Handle end game
+        if(gameFinished) {
+            DialogFragment newFragment = EndGameFragment.newInstance(gameWon, gameActivity.unlockStage(gameWon));
+            newFragment.show(gameActivity.fm, "reset");
+        }
     }
 
     public void update() {
@@ -258,25 +264,23 @@ public void initialize(GameActivity g, Levels gameObjects) {
     @Override
     public void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        if(!gameFinished) {
-            //Draw background + shadowmap
-            canvas.drawBitmap(background, 0, 0, paint);
-            drawInteractables(canvas);
-            drawObstacles(canvas);
-            //Draw player below lights (for now)
-            //Drawing underneath lights disguises some lag of the flashlight
-            drawPlayer(canvas);
-            drawEnemies(canvas);
-            drawLights(canvas);
-            drawHUD(canvas);
-        }
+        //Draw background + shadowmap
+        canvas.drawBitmap(background, 0, 0, paint);
+        drawInteractables(canvas);
+        drawObstacles(canvas);
+        //Draw player below lights (for now)
+        //Drawing underneath lights disguises some lag of the flashlight
+        drawPlayer(canvas);
+        drawEnemies(canvas);
+        drawLights(canvas);
+        drawHUD(canvas);
         //Handle endgame (to be removed and replaced with dialog fragment)
-        else {
-            if (gameWon)
-                canvas.drawBitmap(escaped, (int) (tileWidth * 1.5), (int) (tileHeight * 1.5), paint);
-            else
-                canvas.drawBitmap(captured, (int) (tileWidth * 1.5), (int) (tileHeight * 1.5), paint);
-        }
+//        else {
+//            if (gameWon)
+//                canvas.drawBitmap(escaped, (int) (tileWidth * 1.5), (int) (tileHeight * 1.5), paint);
+//            else
+//                canvas.drawBitmap(captured, (int) (tileWidth * 1.5), (int) (tileHeight * 1.5), paint);
+//        }
     }
 
     private void drawInteractables(Canvas canvas) {
@@ -418,7 +422,6 @@ public void initialize(GameActivity g, Levels gameObjects) {
                             else if (curTime - lastChargeTime > 500) {
                                 player.updateCharge(0.20f);
                                 timeSet = false;
-                                Log.d("In GameView:", "RECHARGE!!!!!");
                             }
                         }
 
@@ -465,6 +468,30 @@ public void initialize(GameActivity g, Levels gameObjects) {
                 break;
         }
         return true;
+    }
+
+    public Player getPlayer() {
+        return player;
+    }
+
+    public void setPlayer(Player player) {
+        this.player = player;
+    }
+
+    public List<Enemies> getEnemyList() {
+        return enemyList;
+    }
+
+    public void setEnemyList(List<Enemies> enemyList) {
+        this.enemyList = enemyList;
+    }
+
+    public boolean hasWon() {
+        return gameWon;
+    }
+
+    public boolean hasFinished() {
+        return gameFinished;
     }
 
 }

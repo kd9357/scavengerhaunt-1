@@ -5,6 +5,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.View;
@@ -19,6 +21,7 @@ public class StageView extends View {
     private Bitmap mLockedStage;
     private Bitmap mUnlockedStage;
     private Paint mPaint;
+    private Paint temp;
 
     //0: locked, 1 unlocked
     private int[] mStages;
@@ -37,14 +40,11 @@ public class StageView extends View {
         mUnlockedStage = BitmapFactory.decodeResource(getResources(), R.drawable.stage_icon_placeholder);
 
         mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-    }
-
-    public int getStageWidth() {
-        return getWidth();
-    }
-
-    public int getStageHeight() {
-        return getHeight();
+        temp = new Paint(Paint.ANTI_ALIAS_FLAG);
+        temp.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC));
+        temp.setColor(getResources().getColor(R.color.colorText));
+        temp.setTextSize(200);
+        temp.setStrokeWidth(100);
     }
 
     @Override
@@ -53,8 +53,6 @@ public class StageView extends View {
         int buttonSize = getWidth() / 5;
         Rect drawingRect = new Rect();
         //Draw on button locations
-        //TODO: Actually calculate button locations
-        //As it stands now the buttons are not in the right position/scale
         int r = 0;
         int c = 0;
         for(int i = 0; i < mStages.length; i++) {
@@ -70,6 +68,8 @@ public class StageView extends View {
             else {
                 //Should also draw i + 1 over the unlocked stage bitmap
                 canvas.drawBitmap(mUnlockedStage, null, drawingRect, mPaint);
+                //canvas.drawText("" + (i + 1), c, r, temp);
+                //canvas.drawRect(drawingRect, temp);
             }
             c += buttonSize;
             if(c > getWidth()) {

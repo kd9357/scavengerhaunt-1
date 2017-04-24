@@ -105,7 +105,6 @@ public class Player {
         int[] coords = {this.centerX, this.centerY};
         float deltaTime = (System.currentTimeMillis() - movementTime);
         deltaTime /= 33.3f;
-        Log.d("deltaTime", "time is " + deltaTime);
         movementTime = System.currentTimeMillis();
         if(moving) {
             //Set orientation
@@ -185,6 +184,15 @@ public class Player {
         centerY = y + imageHeight/2;
     }
 
+    public void newLocation(int x, int y) {
+        updateX(x);
+        updateY(y);
+        hitBox.offsetTo(x + imageWidth / 4, y + imageHeight / 4);
+        flashlight.setCircle(x + flashLightXOffset, y + flashLightYOffset, flashLightRadius);
+        flashlight.setDirection(getDirection());
+        selflight.setCircle(centerX, centerY, selfLightRadius);
+    }
+
     public void startMoving() { moving = true; }
 
     public void stopMoving() { moving = false; }
@@ -242,6 +250,9 @@ public class Player {
         else charge += change;
     }
 
+    public void setCharge(float charge) {
+        this.charge = charge;
+    }
     public boolean hasKey() {
         return hasKey;
     }
