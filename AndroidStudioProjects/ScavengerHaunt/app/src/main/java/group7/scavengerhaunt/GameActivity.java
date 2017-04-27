@@ -48,6 +48,9 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         if(b != null)
             level = b.getInt("level");
 
+        //Just to make sure it's unlocked
+        StageSelectActivity.mStages[level] = 1;
+
         //Display object, get screen size
         Display display = getWindowManager().getDefaultDisplay();
         //Get screen resolution
@@ -145,7 +148,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         outState.putBoolean("hasKey", player.hasKey());
         outState.putDoubleArray("direction", player.getDirection());
         outState.putIntArray("position", new int[]{player.getX(), player.getY()});
-        //Log.d("LOCATION", "Location is (" + player.getX() + "," + player.getY() + ")");
         outState.putFloat("battery", player.getCharge());
         //Enemy information
         outState.putParcelableArrayList("enemies", enemyList);
@@ -173,9 +175,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
             player.setCharge(battery);
             gameView.setPlayer(player);
         }
-
-        //List<Enemies> enemyList = savedInstanceState.getParcelable("enemyList");
-        //gameView.setEnemyList(enemyList);
     }
 
     @Override

@@ -9,6 +9,7 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 
 /**
@@ -72,7 +73,7 @@ public class StageView extends View {
                 //canvas.drawRect(drawingRect, temp);
             }
             c += buttonSize;
-            if(c > getWidth()) {
+            if(c + buttonSize > getWidth()) {
                 c = 0;
                 r += buttonSize;
                 //Unlikely to happen, but possibly add pagination for more stages

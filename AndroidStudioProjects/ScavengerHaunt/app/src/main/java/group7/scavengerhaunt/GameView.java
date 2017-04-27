@@ -198,7 +198,10 @@ public void initialize(GameActivity g, Levels gameObjects) {
 
     private void enemyCollision(Lights.Flashlight f) {
         for(Enemies e : enemyList) {
-            e.update();
+            if(e.isZombie)
+                ((Enemies.Zombie) e).update(player.getCenterX(), player.getCenterY());
+            else
+                e.update();
             Rect box = e.getImageBox();
             e.setIlluminated(f.detectCollision(box));
             if(!e.isIlluminated()) {
@@ -209,6 +212,23 @@ public void initialize(GameActivity g, Levels gameObjects) {
                     }
                 }
             }
+            if(e.isZombie) {
+                //Enemies.Zombie z = (Enemies.Zombie) e;
+                int newX = ((Enemies.Zombie) e).newX;
+                int newY = ((Enemies.Zombie) e).newY;
+                int oldX = e.getCenterX();
+                int oldY = e.getCenterY();
+                for (Obstacles o : obstacleList) {
+                    if(o.detectCollision(newX, oldY)) {
+                        newX = oldX;
+                    }
+                    if(o.detectCollision(oldX, newY)) {
+                        newY = oldY;
+                    }
+                }
+                ((Enemies.Zombie) e).setLocation(newX, newY);
+            }
+
             if(e.detectCollision(player.getHitBox())) {
             //if(e.detectCollision(player.getCenterX(), player.getCenterY())) {
                 playing = false;
@@ -274,13 +294,6 @@ public void initialize(GameActivity g, Levels gameObjects) {
         drawEnemies(canvas);
         drawLights(canvas);
         drawHUD(canvas);
-        //Handle endgame (to be removed and replaced with dialog fragment)
-//        else {
-//            if (gameWon)
-//                canvas.drawBitmap(escaped, (int) (tileWidth * 1.5), (int) (tileHeight * 1.5), paint);
-//            else
-//                canvas.drawBitmap(captured, (int) (tileWidth * 1.5), (int) (tileHeight * 1.5), paint);
-//        }
     }
 
     private void drawInteractables(Canvas canvas) {

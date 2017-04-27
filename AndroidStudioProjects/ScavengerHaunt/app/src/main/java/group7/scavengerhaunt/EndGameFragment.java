@@ -43,7 +43,6 @@ public class EndGameFragment extends DialogFragment {
                                 //Load next stage if possible
                                 //getActivity().finish();
                                 Intent intent = new Intent(getActivity(), GameActivity.class);
-                                //intent.putExtra("level", getArguments().getInt("stageNum") + 1);
                                 intent.putExtra("level", stageNum);
                                 startActivity(intent);
                                 getActivity().finish();

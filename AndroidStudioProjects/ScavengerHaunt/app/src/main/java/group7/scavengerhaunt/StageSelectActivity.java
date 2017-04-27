@@ -17,7 +17,7 @@ public class StageSelectActivity extends AppCompatActivity implements View.OnTou
     private StageView mStageView;
 
     //Must persist on application close
-    public static int[] mStages = new int[11];
+    public static int[] mStages = new int[10];
 
     private int buttonSize;
 
@@ -44,7 +44,9 @@ public class StageSelectActivity extends AppCompatActivity implements View.OnTou
         int xCoord = (int)event.getX();
         int yCoord = (int)event.getY();
         if(xCoord > 0 && xCoord < mStageView.getWidth() && yCoord > 0 && yCoord < mStageView.getHeight()) {
-            int stageNum = xCoord / buttonSize + yCoord / buttonSize;
+            int stageNum = xCoord / buttonSize;
+            if(yCoord / buttonSize == 1)
+                stageNum+=5;
             if(mStages[stageNum] == 1) {
                 if(MainActivity.mSoundOn) {
                     MediaPlayer player = MediaPlayer.create(this, R.raw.button_pressed);
