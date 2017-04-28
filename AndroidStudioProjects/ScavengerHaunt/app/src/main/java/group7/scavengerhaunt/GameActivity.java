@@ -33,11 +33,9 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
     private GameView gameView;
 
     private ImageButton buttonSettingsGear;
-    //Is the game over or not?
-    private boolean mGameOver;
+
     public FragmentManager fm;
 
-    //TODO: add variables for gameview, hud, enemy type/locations, etc
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -65,8 +63,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 
         //Initialize View
         gameView = (GameView) findViewById(R.id.game_view);
-        //Load gameobjects onto view
-        //gameView.initialize(this, size.x, size.y);
+        //Load game objects onto view
         gameView.initialize(this, stage);
 
         buttonSettingsGear = (ImageButton) findViewById(R.id.buttonSettingsGear);
@@ -96,8 +93,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
     //Pause activity
     @Override
     protected void onPause() {
-        //TODO: Save data
-        //Evidently turning the screen off is not the same as pausing
         super.onPause();
         gameView.pause();
     }
@@ -105,7 +100,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
     //Resume activity
     @Override
     protected void onResume() {
-        //TODO: Restore data
         super.onResume();
         gameView.resume();
     }

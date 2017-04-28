@@ -48,10 +48,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         buttonStageSelect.setOnClickListener(this);
         buttonHowToPlay.setOnClickListener(this);
         buttonSettings.setOnClickListener(this);
-
-        //TODO:Call function to grab sharedPref and restore info
         setInstanceVarsFromSharedPrefs();
-
     }
 
     @Override

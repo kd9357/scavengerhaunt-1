@@ -144,10 +144,99 @@ public class Obstacles {
         }
     }
 
+    public static class RoundTable extends Obstacles {
+        public RoundTable(Context context, int x, int y, int scaleX, int scaleY) {
+            super(context, x, y);
+            Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.circle_table);
+            image = Bitmap.createScaledBitmap(temp, GameActivity.tileWidth * scaleX, GameActivity.tileHeight * scaleY, true);
+            imageBox = new Rect(x, y, x+image.getWidth(), y+image.getHeight());
+            hitBox = new Rect(x, y, x + image.getWidth(), y + 5 * image.getHeight() / 6);
+            hasLight = true;
+            illuminated = true;
+            light = new Lights(x + image.getWidth() * 47 / 100, y + image.getHeight() * 33 /100, (int)(GameActivity.tileWidth * 2.5));
+        }
+    }
+
+    public static class Bed extends Obstacles {
+        public Bed(Context context, int x, int y, int scaleX, int scaleY) {
+            super(context, x, y);
+            Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.bed);
+            image = Bitmap.createScaledBitmap(temp, GameActivity.tileWidth * scaleX, GameActivity.tileHeight * scaleY, true);
+            imageBox = new Rect(x, y, x+image.getWidth(), y+image.getHeight());
+            hitBox = new Rect(x, y, x + image.getWidth(), y + image.getHeight());
+        }
+    }
+
+    public static class Couch extends Obstacles {
+        public Couch(Context context, int x, int y, int scaleX, int scaleY) {
+            super(context, x, y);
+            Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.couch);
+            image = Bitmap.createScaledBitmap(temp, GameActivity.tileWidth * scaleX, GameActivity.tileHeight * scaleY, true);
+            imageBox = new Rect(x, y, x+image.getWidth(), y+image.getHeight());
+            hitBox = new Rect(x, y, x + image.getWidth(), y + image.getHeight());
+        }
+    }
+
     public static class LoungeChair extends Obstacles {
         public LoungeChair(Context context, int x, int y, int scaleX, int scaleY) {
             super(context, x, y);
             Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.lounge_chair);
+            image = Bitmap.createScaledBitmap(temp, GameActivity.tileWidth * scaleX, GameActivity.tileHeight * scaleY, true);
+            imageBox = new Rect(x, y, x+image.getWidth(), y+image.getHeight());
+            hitBox = new Rect(x, y, x + image.getWidth(), y + image.getHeight());
+        }
+    }
+
+    public static class Dresser extends Obstacles {
+        public Dresser(Context context, int x, int y, double scaleX, double scaleY) {
+            super(context, x, y);
+            Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.dresser);
+            image = Bitmap.createScaledBitmap(temp, (int)(GameActivity.tileWidth * scaleX), (int)(GameActivity.tileHeight * scaleY), true);
+            imageBox = new Rect(x, y, x+image.getWidth(), y+image.getHeight());
+            hitBox = new Rect(x, y, x + image.getWidth(), y + image.getHeight());
+            hasLight = true;
+            illuminated = true;
+            light = new Lights(x + image.getWidth() / 2, y + image.getHeight() / 4, GameActivity.tileWidth * 2);
+        }
+    }
+
+    public static class Island extends Obstacles {
+        public Island(Context context, int x, int y, double scaleX, double scaleY) {
+            super(context, x, y);
+            Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.island);
+            image = Bitmap.createScaledBitmap(temp, (int)(GameActivity.tileWidth * scaleX), (int)(GameActivity.tileHeight * scaleY), true);
+            imageBox = new Rect(x, y, x+image.getWidth(), y+image.getHeight());
+            hitBox = new Rect(x, y, x + image.getWidth(), y + image.getHeight());
+            hasLight = true;
+            illuminated = true;
+            light = new Lights(x + image.getWidth() * 60 / 100, y + image.getHeight() * 27 /100, GameActivity.tileWidth * 2);
+        }
+    }
+
+    public static class Stove extends Obstacles {
+        public Stove(Context context, int x, int y, int scaleX, int scaleY) {
+            super(context, x, y);
+            Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.stove);
+            image = Bitmap.createScaledBitmap(temp, GameActivity.tileWidth * scaleX, GameActivity.tileHeight * scaleY, true);
+            imageBox = new Rect(x, y, x+image.getWidth(), y+image.getHeight());
+            hitBox = new Rect(x, y, x + image.getWidth(), y + image.getHeight());
+        }
+    }
+
+    public static class Television extends Obstacles {
+        public Television(Context context, int x, int y, int scaleX, int scaleY) {
+            super(context, x, y);
+            Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.television);
+            image = Bitmap.createScaledBitmap(temp, GameActivity.tileWidth * scaleX, GameActivity.tileHeight * scaleY, true);
+            imageBox = new Rect(x, y, x+image.getWidth(), y+image.getHeight());
+            hitBox = new Rect(x, y, x + image.getWidth(), y + image.getHeight());
+        }
+    }
+
+    public static class Wardrobe extends Obstacles {
+        public Wardrobe(Context context, int x, int y, int scaleX, int scaleY) {
+            super(context, x, y);
+            Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.wardrobe);
             image = Bitmap.createScaledBitmap(temp, GameActivity.tileWidth * scaleX, GameActivity.tileHeight * scaleY, true);
             imageBox = new Rect(x, y, x+image.getWidth(), y+image.getHeight());
             hitBox = new Rect(x, y, x + image.getWidth(), y + image.getHeight());
@@ -164,6 +253,18 @@ public class Obstacles {
         }
     }
 
+    public static class Lantern extends Obstacles {
+        public Lantern(Context context, int x, int y, double scaleX, double scaleY) {
+            super(context, x, y);
+            Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.lantern);
+            image = Bitmap.createScaledBitmap(temp, (int)(GameActivity.tileWidth * scaleX), (int)(GameActivity.tileHeight * scaleY), true);
+            imageBox = new Rect(x, y, x+image.getWidth(), y+image.getHeight());
+            hitBox = new Rect(x, y, x + image.getWidth(), y + image.getHeight());
+            hasLight = true;
+            illuminated = true;
+            light = new Lights(x + image.getWidth() / 2, y + image.getHeight() / 2, GameActivity.tileWidth * 2);
+        }
+    }
     //The fireplace is a triangle, not a rectangle hitbox
     public static class Fireplace extends Obstacles {
         private float[] p1 = new float[2];

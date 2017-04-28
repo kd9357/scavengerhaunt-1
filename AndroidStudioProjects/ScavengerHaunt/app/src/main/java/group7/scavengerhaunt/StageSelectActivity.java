@@ -38,8 +38,6 @@ public class StageSelectActivity extends AppCompatActivity implements View.OnTou
 
 
     public boolean onTouch(View v, MotionEvent event) {
-        //TODO: Calculate which item touched given xy coordinates
-        //Right now just touching the screen starts a default game
         buttonSize = mStageView.getWidth() / 5;
         int xCoord = (int)event.getX();
         int yCoord = (int)event.getY();

@@ -41,7 +41,6 @@ public class EndGameFragment extends DialogFragment {
                         .setPositiveButton("Continue", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
                                 //Load next stage if possible
-                                //getActivity().finish();
                                 Intent intent = new Intent(getActivity(), GameActivity.class);
                                 intent.putExtra("level", stageNum);
                                 startActivity(intent);

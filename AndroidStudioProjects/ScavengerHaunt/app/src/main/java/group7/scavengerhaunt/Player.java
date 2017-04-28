@@ -41,8 +41,6 @@ public class Player {
     private double distance;
     //The normalized direction the player should be heading to
     private double[] direction;
-//    private double directionX;
-//    private double directionY;
     //Player's heading in relation with North
     private double angleDegrees = 0;
 
@@ -64,21 +62,21 @@ public class Player {
     private long lastTime;  //For battery
     private long movementTime;  //For movement
     private float charge;
-    //Has key?
+
     private boolean hasKey = false;
 
     //Context, startX, startY, screenX min, screenY min, screenX max, screenY max, width of player, width of height
     public Player(Context context, int startX, int startY, int minX, int minY, int screenX, int screenY, int tileWidth, int tileHeight) {
-        //For the wall
+        //For the walls
         screenMinX = minX;
         screenMinY = minY;
-        //Set current orientation to point northwards as default
         Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.avatar);
         image = Bitmap.createScaledBitmap(temp, tileWidth, tileHeight, true);
         this.imageWidth = image.getWidth();
         this.imageHeight = image.getHeight();
-        //Set position
+        //Set current orientation to point northwards as default
         direction = new double[]{0, -1};
+        //Set location
         updateX(startX);
         updateY(startY);
         hitBox = new Rect(x + imageWidth / 5, y + imageWidth / 5, x + 4 * imageWidth / 5, y + 4 * imageHeight / 5);
@@ -111,8 +109,6 @@ public class Player {
             angleDegrees = (float) GameActivity.getAngle(direction[0], direction[1]);
             if(direction[0] < 0)
                 angleDegrees = -angleDegrees;
-//            coords[0] += direction[0] * speed * deltaTime;
-//            coords[1] += direction[1] * speed * deltaTime;
             coords[0] += direction[0] * GameActivity.tileWidth / 10f * deltaTime;
             coords[1] += direction[1] * GameActivity.tileWidth / 10f * deltaTime;
         }
@@ -129,8 +125,6 @@ public class Player {
 
     //Sets player location
     public void setLocation(int newX, int newY) {
-        int deltaX = newX - x;
-        int deltaY = newY - y;
         updateX(newX - imageWidth/2);
         updateY(newY - imageHeight/2);
 

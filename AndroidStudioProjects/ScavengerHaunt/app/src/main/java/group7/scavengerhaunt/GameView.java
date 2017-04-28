@@ -49,6 +49,9 @@ public class GameView extends View implements Runnable {
 
     //This variable is volatile for when the phone pauses or not
     volatile boolean playing;
+    //Determines the text of the dialog fragment
+    private boolean gameWon = false;
+    private boolean gameFinished = false;
 
     // Used for recharge mechanic
     private long lastChargeTime;
@@ -63,9 +66,6 @@ public class GameView extends View implements Runnable {
 
     //Static images
     private Bitmap background;
-
-    private Bitmap escaped;
-    private Bitmap captured;
 
     //Game Objects
     private Player player;
@@ -82,10 +82,6 @@ public class GameView extends View implements Runnable {
     private Paint hitBoxPaint;
     private Canvas darkness;
     private Bitmap darknessBitmap;
-
-    //Determines the text of the dialog fragment
-    private boolean gameWon = false;
-    private boolean gameFinished = false;
 
     Context context;
 
@@ -133,13 +129,6 @@ public void initialize(GameActivity g, Levels gameObjects) {
     obstacleList = gameObjects.getObstacleList();
     enemyList = gameObjects.getEnemyList();
     lightList = gameObjects.getLightList();
-
-    //Create our background and decorations
-    Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.escaped);
-    escaped = Bitmap.createScaledBitmap(temp, screenMaxX - tileWidth * 3, screenMaxY - tileHeight * 3, true);
-    temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.captured);
-    captured = Bitmap.createScaledBitmap(temp, screenMaxX - tileWidth * 3, screenMaxY - tileHeight *3, true);
-
 
     // Set battery recharge time
     lastChargeTime = System.currentTimeMillis();
@@ -213,7 +202,6 @@ public void initialize(GameActivity g, Levels gameObjects) {
                 }
             }
             if(e.isZombie) {
-                //Enemies.Zombie z = (Enemies.Zombie) e;
                 int newX = ((Enemies.Zombie) e).newX;
                 int newY = ((Enemies.Zombie) e).newY;
                 int oldX = e.getCenterX();
@@ -286,10 +274,9 @@ public void initialize(GameActivity g, Levels gameObjects) {
         super.onDraw(canvas);
         //Draw background + shadowmap
         canvas.drawBitmap(background, 0, 0, paint);
+
         drawInteractables(canvas);
         drawObstacles(canvas);
-        //Draw player below lights (for now)
-        //Drawing underneath lights disguises some lag of the flashlight
         drawPlayer(canvas);
         drawEnemies(canvas);
         drawLights(canvas);
@@ -376,10 +363,7 @@ public void initialize(GameActivity g, Levels gameObjects) {
         }
     }
 
-    //This supposedly makes the game run at a steady 60fps
-    //TODO: modify the length of sleep to maintain steady fps
-    //We can shoot for 30fps instead
-    //Need to optimize, 30fps is getting harder to achieve
+    //This attempts to makes the game run at a steady 30fps
     private void controlFrameRate() {
         try {
             gameThread.sleep(33);
@@ -449,7 +433,6 @@ public void initialize(GameActivity g, Levels gameObjects) {
                 }
             };
 
-
     @Override
     public boolean onTouchEvent(MotionEvent motionEvent) {
         switch(motionEvent.getAction() & MotionEvent.ACTION_MASK) {
@@ -460,20 +443,8 @@ public void initialize(GameActivity g, Levels gameObjects) {
             //Screen is touched, face in destination direction
             //If held down, move in that direction as well
             case MotionEvent.ACTION_DOWN:
-                //TODO: If using dialog remove this
-                if (gameFinished) {
-                    if (motionEvent.getX() > screenMaxX - tileWidth * 6 && motionEvent.getX() < screenMaxX - tileWidth) {
-                        if (motionEvent.getY() > screenMaxY - tileHeight * 5 && motionEvent.getY() < screenMaxY - tileHeight) {
-                            gameActivity.finish();
-                        }
-                    }
-                    //if gamelost, do gameActivity.recreate() to reset
-                    //otherwise, get a new intent for next stage, gameActivity.finish(), then startActivity(intent)
-                }
-                else {
-                    player.setDestination((int) motionEvent.getX(), (int) motionEvent.getY());
-                    player.startMoving();
-                }
+                player.setDestination((int) motionEvent.getX(), (int) motionEvent.getY());
+                player.startMoving();
                 break;
             //Screen is being pressed & moved, player should move
             case MotionEvent.ACTION_MOVE:
