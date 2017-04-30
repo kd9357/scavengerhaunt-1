@@ -87,10 +87,14 @@ public class Obstacles {
 
     public static class Table extends Obstacles {
         List<Rect> hitBoxes = new ArrayList<>();
-        public Table(Context context, int x, int y, int scaleX, int scaleY) {
+        public Table(Context context, int x, int y, int scaleX, int scaleY, boolean recolor) {
             super(context, x, y);
             //Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.table);
-            Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.table_full);
+            Bitmap temp;
+            if(recolor)
+                temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.table_blue);
+            else
+                temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.table_full);
             image = Bitmap.createScaledBitmap(temp, GameActivity.tileWidth * scaleX, GameActivity.tileHeight * scaleY, true);
             imageBox = new Rect(x, y, x+image.getWidth(), y+image.getHeight());
             hitBoxes.add(new Rect(x + image.getWidth() / 7, y + image.getHeight() / 6, x + 6 *image.getWidth() / 7, y + 3 * image.getHeight() / 4));
@@ -163,17 +167,23 @@ public class Obstacles {
     public static class LongTable extends Obstacles {
         private List<Lights> lightList = new ArrayList<>();
 
-        public LongTable(Context context, int x, int y, int scaleX, int scaleY) {
+        public LongTable(Context context, int x, int y, int scaleX, int scaleY, boolean recolor) {
             super(context, x, y);
-            Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.giant_table);
+            Bitmap temp;
+            if(recolor)
+                temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.giant_table_blank);
+            else
+                temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.giant_table);
             image = Bitmap.createScaledBitmap(temp, GameActivity.tileWidth * scaleX, GameActivity.tileHeight * scaleY, true);
             imageBox = new Rect(x, y, x+image.getWidth(), y+image.getHeight());
             hitBox = new Rect(x, y, x + image.getWidth(), y + 5 * image.getHeight() / 6);
-            hasLight = true;
-            illuminated = true;
-            lightList.add(new Lights(x + image.getWidth() * 22 / 100, y + image.getHeight() * 33 /100, (int)(GameActivity.tileWidth * 2.5)));
-            lightList.add(new Lights(x + image.getWidth() / 2, y + image.getHeight() * 33 /100, (int)(GameActivity.tileWidth * 2.5)));
-            lightList.add(new Lights(x + image.getWidth() * 79 / 100, y + image.getHeight() * 33 /100, (int)(GameActivity.tileWidth * 2.5)));
+            if(!recolor) {
+                hasLight = true;
+                illuminated = true;
+                lightList.add(new Lights(x + image.getWidth() * 22 / 100, y + image.getHeight() * 33 / 100, (int) (GameActivity.tileWidth * 2.5)));
+                lightList.add(new Lights(x + image.getWidth() / 2, y + image.getHeight() * 33 / 100, (int) (GameActivity.tileWidth * 2.5)));
+                lightList.add(new Lights(x + image.getWidth() * 79 / 100, y + image.getHeight() * 33 / 100, (int) (GameActivity.tileWidth * 2.5)));
+            }
         }
 
         public List<Lights> getLights() {
@@ -235,15 +245,21 @@ public class Obstacles {
     }
 
     public static class Island extends Obstacles {
-        public Island(Context context, int x, int y, double scaleX, double scaleY) {
+        public Island(Context context, int x, int y, double scaleX, double scaleY, boolean recolor) {
             super(context, x, y);
-            Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.island);
+            Bitmap temp;
+            if(recolor)
+                temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.island_blank);
+            else
+                temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.island);
             image = Bitmap.createScaledBitmap(temp, (int)(GameActivity.tileWidth * scaleX), (int)(GameActivity.tileHeight * scaleY), true);
             imageBox = new Rect(x, y, x+image.getWidth(), y+image.getHeight());
             hitBox = new Rect(x, y, x + image.getWidth(), y + image.getHeight());
-            hasLight = true;
-            illuminated = true;
-            light = new Lights(x + image.getWidth() * 60 / 100, y + image.getHeight() * 27 /100, GameActivity.tileWidth * 2);
+            if(!recolor) {
+                hasLight = true;
+                illuminated = true;
+                light = new Lights(x + image.getWidth() * 60 / 100, y + image.getHeight() * 27 / 100, GameActivity.tileWidth * 2);
+            }
         }
     }
 
@@ -288,15 +304,17 @@ public class Obstacles {
     }
 
     public static class Lamp extends Obstacles {
-        public Lamp(Context context, int x, int y, double scaleX, double scaleY) {
+        public Lamp(Context context, int x, int y, double scaleX, double scaleY, boolean lightOn) {
             super(context, x, y);
             Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.tall_lamp);
             image = Bitmap.createScaledBitmap(temp, (int)(GameActivity.tileWidth * scaleX), (int)(GameActivity.tileHeight * scaleY), true);
             imageBox = new Rect(x, y, x+image.getWidth(), y+image.getHeight());
             hitBox = new Rect(x, y, x + image.getWidth(), y + image.getHeight());
-            hasLight = true;
-            illuminated = true;
-            light = new Lights(x + image.getWidth() / 2, y + image.getHeight() / 5, GameActivity.tileWidth * 2);
+            if(lightOn) {
+                hasLight = true;
+                illuminated = true;
+                light = new Lights(x + image.getWidth() / 2, y + image.getHeight() / 5, GameActivity.tileWidth * 2);
+            }
         }
     }
 

@@ -70,7 +70,7 @@ public class EndGameFragment extends DialogFragment {
         }
         else {
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-            builder.setMessage("You Were Caught!")
+            builder.setMessage("You Were Captured!")
                     .setPositiveButton("Try Again", new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
                             getActivity().recreate();

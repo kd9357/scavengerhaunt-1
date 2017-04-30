@@ -78,7 +78,7 @@ public class Levels {
                 door = new Interactables.Door(context, 0, tileHeight, tileWidth * 2, tileHeight * 2, false);
                 key = new Interactables.Key(context, (int)(tileWidth * 2.5), tileHeight * 10, tileWidth, tileHeight);
                 //Create our obstacles
-                obstacleList.add(new Obstacles.Table(context, tileWidth * 2, tileHeight *  4, 7, 7));
+                obstacleList.add(new Obstacles.Table(context, tileWidth * 2, tileHeight *  4, 7, 7, false));
                 obstacleList.add(new Obstacles.LoungeChair(context, tileWidth * 16, tileHeight * 8, 4, 4));
                 //obstacleList.add(new Obstacles.Box(context, tileWidth * 3, 0, 3, 2));
                 obstacleList.add(new Obstacles.Fireplace(context, tileWidth *15, 0, 6, 5));
@@ -103,7 +103,7 @@ public class Levels {
                 door = new Interactables.Door(context, tileWidth * 16, 0, tileWidth * 2, tileHeight * 2, true);
                 key = new Interactables.Key(context, (int)(tileWidth * 2.5), tileHeight * 3, tileWidth, tileHeight);
                 obstacleList.add(new Obstacles.ClothTable(context, tileWidth * 5, tileHeight * 2, 3, 7));
-                obstacleList.add(new Obstacles.Island(context, tileWidth * 12, tileHeight * 7, 5, 3));
+                obstacleList.add(new Obstacles.Island(context, tileWidth * 12, tileHeight * 7, 5, 3, false));
                 m =  new Enemies.Mummy(context, tileWidth * 2, tileHeight * 9, 3, 3, 1, 0);
                 m.setPath(GameActivity.tileWidth * 9);
                 enemyList.add(m);
@@ -123,7 +123,7 @@ public class Levels {
                 door = new Interactables.Door(context, tileWidth * 5, 0, tileWidth * 2, tileHeight * 2, true);
                 key = new Interactables.Key(context, tileWidth * 18, tileHeight * 2, tileWidth, tileHeight);
                 obstacleList.add(new Obstacles.WoodTable(context, tileWidth * 5, tileHeight * 5, 8, 4, false));
-                obstacleList.add(new Obstacles.Box(context, tileWidth * 16, tileHeight * 4, 3, 2));
+                obstacleList.add(new Obstacles.Island(context, tileWidth * 16, tileHeight * 4, 4, 2, true));
                 obstacleList.add(new Obstacles.Lantern(context, tileWidth * 12, tileHeight * 5, 0.5, 1));
                 m =  new Enemies.Mummy(context, tileWidth * 2, tileHeight * 2, 3, 3, 1, 0);
                 m.setPath(GameActivity.tileWidth * 9);
@@ -150,7 +150,7 @@ public class Levels {
                 key = new Interactables.Key(context, tileWidth * 9, 0, tileWidth, tileHeight);
                 //Create our obstacles
                 obstacleList.add(new Obstacles.Box(context, tileWidth * 3, tileHeight, 3, 2));
-                obstacleList.add(new Obstacles.WoodTable(context, tileWidth * 4, 0, 5, 4, true));
+                obstacleList.add(new Obstacles.LongTable(context, tileWidth * 4, 0, 5, 4, true));
                 obstacleList.add(new Obstacles.Television(context, tileWidth * 11, 0, 2, 3));
                 obstacleList.add(new Obstacles.RoundTable(context, tileWidth * 7, tileHeight * 8, 3, 3));
                 obstacleList.add(new Obstacles.LoungeChair(context, tileWidth * 14, tileHeight * 5, 4, 4));
@@ -197,9 +197,9 @@ public class Levels {
                 player.setDirection(1, 0);
                 door = new Interactables.Door(context, 0, tileHeight * 3, tileWidth * 2, tileHeight * 2, false);
                 key = new Interactables.Key(context, tileWidth * 18, tileHeight * 4, tileWidth, tileHeight);
-                obstacleList.add(new Obstacles.Table(context, tileWidth * 4, tileHeight, 6, 6));
-                obstacleList.add(new Obstacles.Island(context, tileWidth * 11, tileHeight * 7, 4, 2.5));
-                obstacleList.add(new Obstacles.Stove(context, tileWidth * 18, tileHeight * 7, 2, 5));
+                obstacleList.add(new Obstacles.Table(context, tileWidth * 4, tileHeight, 6, 6, true));
+                obstacleList.add(new Obstacles.Island(context, tileWidth * 11, tileHeight * 7, 4, 2.5, false));
+                obstacleList.add(new Obstacles.Stove(context, (int)(tileWidth * 18.3), tileHeight * 7, 2, 5));
                 m =  new Enemies.Mummy(context, tileWidth * 15, (int)(tileHeight * 9.5), 3, 3, 0, -1);
                 m.setPath(GameActivity.tileWidth * 4);
                 enemyList.add(m);
@@ -222,7 +222,7 @@ public class Levels {
                 key = new Interactables.Key(context, tileWidth * 3, tileHeight * 10, tileWidth, tileHeight);
                 player = new Player(context, tileWidth * 17, tileHeight * 9, screenMinX, screenMinY, screenMaxX, screenMaxY, (int)(tileWidth * 2.5), (int)(tileHeight * 2.5));
                 player.setDirection(-1, 0);
-                Obstacles.LongTable longTable = new Obstacles.LongTable(context, tileWidth * 4, tileHeight * 5, 12, 4);
+                Obstacles.LongTable longTable = new Obstacles.LongTable(context, tileWidth * 4, tileHeight * 5, 12, 4, false);
                 obstacleList.add(longTable);
                 z = new Enemies.Zombie(context, tileWidth * 5, tileHeight * 9, 3, 3, 1, 0);
                 enemyList.add(z);
@@ -233,7 +233,7 @@ public class Levels {
             case 8:
                 screenMinX = tileWidth * 2;
                 screenMinY = 0;
-                temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.level_two);
+                temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.level_five);
                 background = Bitmap.createScaledBitmap(temp, screenMaxX, screenMaxY, true);
                 door = new Interactables.Door(context, 0, tileHeight * 8, tileWidth * 2, tileHeight * 2, false);
                 key = new Interactables.Key(context, tileWidth * 18, tileHeight, tileWidth, tileHeight);
@@ -241,7 +241,7 @@ public class Levels {
                 player.setDirection(-1, 0);
                 obstacleList.add(new Obstacles.Bed(context, tileWidth * 13, 0, 5, 4));
                 obstacleList.add(new Obstacles.Wardrobe(context, tileWidth * 18, tileHeight * 7, 3, 5));
-                obstacleList.add(new Obstacles.WoodTable(context, tileWidth * 4, tileHeight * 5, 6, 3, false));
+                obstacleList.add(new Obstacles.LongTable(context, tileWidth * 4, tileHeight * 5, 6, 3, true));
                 obstacleList.add(new Obstacles.Lantern(context, tileWidth * 12, tileWidth * 3, 0.5, 1));
                 m = new Enemies.Mummy(context, tileWidth * 10, tileHeight * 3, 3, 3, 0, 1);
                 m.setPath(GameActivity.tileHeight * 6);
@@ -264,10 +264,12 @@ public class Levels {
                 player = new Player(context, tileWidth * 17, tileHeight * 3, screenMinX, screenMinY, screenMaxX, screenMaxY, (int)(tileWidth * 2.5), (int)(tileHeight * 2.5));
                 player.setDirection(0, 1);
 
-                obstacleList.add(new Obstacles.WoodTable(context, tileWidth * 9, tileHeight * 2, 3, 3, false));
-                obstacleList.add(new Obstacles.WoodTable(context, tileWidth * 5, tileHeight * 9, 3, 3, false));
-                obstacleList.add(new Obstacles.WoodTable(context, tileWidth * 12, tileHeight * 7, 3, 3, false));
+                obstacleList.add(new Obstacles.BookCase(context, tileWidth * 9, -tileHeight, 3, 4));
+                obstacleList.add(new Obstacles.Box(context, tileWidth * 10, (int)(tileHeight * 2.5), 3, 2));
+                obstacleList.add(new Obstacles.Couch(context, tileWidth * 5, tileHeight * 9, 4, 3));
+                obstacleList.add(new Obstacles.WoodTable(context, tileWidth * 12, tileHeight * 7, 3, 3, true));
                 obstacleList.add(new Obstacles.Lantern(context, tileWidth *  14, tileHeight * 7, 0.5, 1));
+                obstacleList.add(new Obstacles.Lamp(context, tileWidth * 2, 0, 1.5, 4, false));
 
                 m = new Enemies.Mummy(context, tileWidth * 2, tileHeight * 2, 3, 3, 0, 1);
                 m.setPath(GameActivity.tileHeight * 6);

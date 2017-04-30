@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
@@ -44,6 +45,7 @@ public class StageView extends View {
         temp = new Paint(Paint.ANTI_ALIAS_FLAG);
         temp.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC));
         temp.setColor(getResources().getColor(R.color.colorText));
+        temp.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_ATOP));
         temp.setTextSize(200);
         temp.setStrokeWidth(100);
     }
@@ -69,8 +71,12 @@ public class StageView extends View {
             else {
                 //Should also draw i + 1 over the unlocked stage bitmap
                 canvas.drawBitmap(mUnlockedStage, null, drawingRect, mPaint);
-                //canvas.drawText("" + (i + 1), c, r, temp);
-                //canvas.drawRect(drawingRect, temp);
+                int leftOffset = c + buttonSize / 3;
+                int upOffset = r + 2 * buttonSize / 3;
+                if(i + 1 > 9) {
+                    leftOffset = c + buttonSize / 6;
+                }
+                canvas.drawText("" + (i + 1), leftOffset, upOffset, temp);
             }
             c += buttonSize;
             if(c + buttonSize > getWidth()) {
