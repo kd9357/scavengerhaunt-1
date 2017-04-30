@@ -58,7 +58,7 @@ public class EndGameFragment extends DialogFragment {
             }
             else {
                 AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                builder.setMessage("You Escaped!")
+                builder.setMessage("You Escaped the Mansion!")
                         .setNegativeButton("Exit", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
                                 getActivity().finish();

@@ -319,7 +319,7 @@ public class Enemies implements Parcelable {
         private boolean movingHorizontally;
         public Mummy (Context context, int x, int y, int scaleX, int scaleY, double xVector, double yVector) {
             super(context, x, y);
-            Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.zombie);
+            Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.mummy);
             image = Bitmap.createScaledBitmap(temp, GameActivity.tileWidth * scaleX, GameActivity.tileHeight * scaleY, true);
             this.imageWidth = image.getWidth();
             this.imageHeight = image.getHeight();

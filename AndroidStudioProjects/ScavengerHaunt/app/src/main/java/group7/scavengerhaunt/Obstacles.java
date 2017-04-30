@@ -145,6 +145,8 @@ public class Obstacles {
     }
 
     public static class RoundTable extends Obstacles {
+
+
         public RoundTable(Context context, int x, int y, int scaleX, int scaleY) {
             super(context, x, y);
             Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.circle_table);
@@ -154,6 +156,38 @@ public class Obstacles {
             hasLight = true;
             illuminated = true;
             light = new Lights(x + image.getWidth() * 47 / 100, y + image.getHeight() * 33 /100, (int)(GameActivity.tileWidth * 2.5));
+        }
+    }
+
+    //You must use getLights and add to lightList, not standard getLights
+    public static class LongTable extends Obstacles {
+        private List<Lights> lightList = new ArrayList<>();
+
+        public LongTable(Context context, int x, int y, int scaleX, int scaleY) {
+            super(context, x, y);
+            Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.giant_table);
+            image = Bitmap.createScaledBitmap(temp, GameActivity.tileWidth * scaleX, GameActivity.tileHeight * scaleY, true);
+            imageBox = new Rect(x, y, x+image.getWidth(), y+image.getHeight());
+            hitBox = new Rect(x, y, x + image.getWidth(), y + 5 * image.getHeight() / 6);
+            hasLight = true;
+            illuminated = true;
+            lightList.add(new Lights(x + image.getWidth() * 22 / 100, y + image.getHeight() * 33 /100, (int)(GameActivity.tileWidth * 2.5)));
+            lightList.add(new Lights(x + image.getWidth() / 2, y + image.getHeight() * 33 /100, (int)(GameActivity.tileWidth * 2.5)));
+            lightList.add(new Lights(x + image.getWidth() * 79 / 100, y + image.getHeight() * 33 /100, (int)(GameActivity.tileWidth * 2.5)));
+        }
+
+        public List<Lights> getLights() {
+            return lightList;
+        }
+    }
+
+    public static class BookCase extends Obstacles {
+        public BookCase(Context context, int x, int y, int scaleX, int scaleY) {
+            super(context, x, y);
+            Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.book_case);
+            image = Bitmap.createScaledBitmap(temp, GameActivity.tileWidth * scaleX, GameActivity.tileHeight * scaleY, true);
+            imageBox = new Rect(x, y, x+image.getWidth(), y+image.getHeight());
+            hitBox = new Rect(x, y, x + image.getWidth(), y + image.getHeight());
         }
     }
 
@@ -250,6 +284,32 @@ public class Obstacles {
             image = Bitmap.createScaledBitmap(temp, GameActivity.tileWidth * scaleX, GameActivity.tileHeight * scaleY, true);
             imageBox = new Rect(x, y, x+image.getWidth(), y+image.getHeight());
             hitBox = new Rect(x, y, x + image.getWidth(), y + image.getHeight());
+        }
+    }
+
+    public static class Lamp extends Obstacles {
+        public Lamp(Context context, int x, int y, double scaleX, double scaleY) {
+            super(context, x, y);
+            Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.tall_lamp);
+            image = Bitmap.createScaledBitmap(temp, (int)(GameActivity.tileWidth * scaleX), (int)(GameActivity.tileHeight * scaleY), true);
+            imageBox = new Rect(x, y, x+image.getWidth(), y+image.getHeight());
+            hitBox = new Rect(x, y, x + image.getWidth(), y + image.getHeight());
+            hasLight = true;
+            illuminated = true;
+            light = new Lights(x + image.getWidth() / 2, y + image.getHeight() / 5, GameActivity.tileWidth * 2);
+        }
+    }
+
+    public static class WallSconce extends Obstacles {
+        public WallSconce(Context context, int x, int y, double scaleX, double scaleY) {
+            super(context, x, y);
+            Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.wall_sconce);
+            image = Bitmap.createScaledBitmap(temp, (int)(GameActivity.tileWidth * scaleX), (int)(GameActivity.tileHeight * scaleY), true);
+            imageBox = new Rect(x, y, x+image.getWidth(), y+image.getHeight());
+            hitBox = new Rect(x, y, x + image.getWidth(), y + image.getHeight());
+            hasLight = true;
+            illuminated = true;
+            light = new Lights(x + image.getWidth() / 2, y + image.getHeight() / 2, GameActivity.tileWidth * 2);
         }
     }
 

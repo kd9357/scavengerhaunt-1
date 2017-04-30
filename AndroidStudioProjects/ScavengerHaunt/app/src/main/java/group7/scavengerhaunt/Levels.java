@@ -50,7 +50,7 @@ public class Levels {
             case 0:
                 screenMinX = tileWidth;
                 screenMinY = tileHeight * 2;
-                temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.background_top);
+                temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.level_one);
                 background = Bitmap.createScaledBitmap(temp, screenMaxX, screenMaxY, true);
                 player = new Player(context, tileWidth * 18, tileHeight * 3, screenMinX, screenMinY, screenMaxX, screenMaxY, (int)(tileWidth * 2.5), (int)(tileHeight * 2.5));
                 player.setDirection(-1, 0);
@@ -69,7 +69,7 @@ public class Levels {
             case 1:
                 screenMinX = tileWidth * 2;
                 screenMinY = 0;
-                temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.background_full);
+                temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.level_two);
                 background = Bitmap.createScaledBitmap(temp, screenMaxX, screenMaxY, true);
                 //Context, startX, startY, screenX min, screenY min, screenX max, screenY max, width of player, width of height
                 player = new Player(context, tileWidth * 18, tileHeight * 6, screenMinX, screenMinY, screenMaxX, screenMaxY, (int)(tileWidth * 2.5), (int)(tileHeight * 2.5));
@@ -96,7 +96,7 @@ public class Levels {
             case 2:
                 screenMinX = tileWidth;
                 screenMinY = tileHeight * 2;
-                temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.background_top);
+                temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.level_three);
                 background = Bitmap.createScaledBitmap(temp, screenMaxX, screenMaxY, true);
                 player = new Player(context, tileWidth * 18, tileHeight * 9, screenMinX, screenMinY, screenMaxX, screenMaxY, (int)(tileWidth * 2.5), (int)(tileHeight * 2.5));
                 player.setDirection(-1, 0);
@@ -140,7 +140,7 @@ public class Levels {
             case 4:
                 screenMinX = tileWidth * 2;
                 screenMinY = 0;
-                temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.background_full);
+                temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.level_five);
                 background = Bitmap.createScaledBitmap(temp, screenMaxX, screenMaxY, true);
                 //Context, startX, startY, screenX min, screenY min, screenX max, screenY max, width of player, width of height
                 player = new Player(context, tileWidth * 18, tileHeight * 9, screenMinX, screenMinY, screenMaxX, screenMaxY, (int)(tileWidth * 2.5), (int)(tileHeight * 2.5));
@@ -222,19 +222,18 @@ public class Levels {
                 key = new Interactables.Key(context, tileWidth * 3, tileHeight * 10, tileWidth, tileHeight);
                 player = new Player(context, tileWidth * 17, tileHeight * 9, screenMinX, screenMinY, screenMaxX, screenMaxY, (int)(tileWidth * 2.5), (int)(tileHeight * 2.5));
                 player.setDirection(-1, 0);
-                obstacleList.add(new Obstacles.WoodTable(context, tileWidth * 6, tileHeight * 5, 10, 5, true));
+                Obstacles.LongTable longTable = new Obstacles.LongTable(context, tileWidth * 4, tileHeight * 5, 12, 4);
+                obstacleList.add(longTable);
                 z = new Enemies.Zombie(context, tileWidth * 5, tileHeight * 9, 3, 3, 1, 0);
                 enemyList.add(z);
                 lightList.add(player.getSelfLight());
-                for(Obstacles o : obstacleList) {
-                    if(o.hasLight())
-                        lightList.add(o.getLight());
-                }
+                List<Lights> tableLights = longTable.getLights();
+                lightList.addAll(tableLights);
                 break;
             case 8:
                 screenMinX = tileWidth * 2;
                 screenMinY = 0;
-                temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.background_full);
+                temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.level_two);
                 background = Bitmap.createScaledBitmap(temp, screenMaxX, screenMaxY, true);
                 door = new Interactables.Door(context, 0, tileHeight * 8, tileWidth * 2, tileHeight * 2, false);
                 key = new Interactables.Key(context, tileWidth * 18, tileHeight, tileWidth, tileHeight);
