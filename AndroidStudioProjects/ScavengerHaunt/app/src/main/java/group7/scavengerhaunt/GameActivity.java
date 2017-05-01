@@ -85,6 +85,12 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
     public int unlockStage(boolean won) {
         if(level + 1 < StageSelectActivity.mStages.length && won) {
             StageSelectActivity.mStages[level + 1] = 1;
+            SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+            SharedPreferences.Editor editor = sharedPref.edit();
+            for (int i = 1; i < StageSelectActivity.mStages.length; i++) {
+                editor.putInt("stage" + i, StageSelectActivity.mStages[i]);
+            }
+            editor.apply();
             return level + 1;
         }
         return -1;

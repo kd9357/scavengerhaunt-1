@@ -27,7 +27,6 @@ public class StageSelectActivity extends AppCompatActivity implements View.OnTou
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_stage_select);
 
-        //mStages = new int[]{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
         restoreStages();
         //Using Canvas to display buttons
         mStageView = (StageView) findViewById(R.id.stageView);
