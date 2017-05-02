@@ -1,7 +1,7 @@
 <resources>
-    <string name="app_name">ScavengerHaunt</string>
+    <string name="app_name">Scavenger Haunt</string>
     <string name="how_to_play_title">How to Play</string>
-    <string name="how_to_play_text">You\'ve been dared to spend the entire night in a "haunted" house, but it turns out the place is actually haunted! Quickly make your escape from room to room and get out before the monsters get you!\n\n• To move around, press and hold anywhere on the screen and you\'ll walk to that point.\n• To exit the room, find the key and, after picking it up, head to the door.\n• If your flashlight starts running low on power, find a safe spot to stop and shake the device to recharge.\n• Watch our for monster; if they get you, it\'s all over!</string>
+    <string name="how_to_play_text">You\'ve been dared to spend the entire night in a "haunted" house, but it turns out the place is actually haunted! Quickly make your escape from room to room and get out before the monsters get you!\n\n• To move around, press and hold anywhere on the screen and you\'ll walk to that point.\n• To exit the room, find the key and, after picking it up, head to the door.\n• If your flashlight starts running low on power, find a safe spot to stop and shake the device to recharge.\n• Watch out for monster; if they get you, it\'s all over!</string>
     <string name="sound_title">Sound</string>
     <string name="sound_summary">Turn the sound on or off</string>
     <string name="stage_select_title">Select a Stage</string>

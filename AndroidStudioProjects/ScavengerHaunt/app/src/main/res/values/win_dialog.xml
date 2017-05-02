@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:android="http://schemas.android.com/tools">
+    <style name="win_dialog" parent="@android:style/ThemeOverlay.Material.Dialog">
+    <item name="windowNoTitle">true</item>
+    <item name="windowActionBar">false</item>
+    <item name="android:windowFullscreen">false</item>
+    <item name="android:windowContentOverlay">@null</item>
+    <item name="colorPrimary">@color/colorPrimary</item>
+    <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+    <item name="colorAccent">@color/colorAccent</item>
+    <item name="android:windowBackground">@drawable/win_screen</item>
+    <item name="android:textColor">@color/limeGreen</item>
+    <item name="android:textColorSecondary">@color/limeGreen</item>
+    </style>
+</resources>

@@ -1,5 +1,7 @@
 package group7.scavengerhaunt;
 
+import android.app.DialogFragment;
+import android.app.FragmentManager;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -14,6 +16,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.media.MediaPlayer;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -35,9 +38,6 @@ public class GameView extends View implements Runnable {
     private GameActivity gameActivity;
     private SensorManager sensorMgr;
 
-    private final int NUM_COLUMNS = 20;
-    private final int NUM_ROWS = 12;
-
     //Determines the minimum size of each object
     public static int tileWidth;
     public static int tileHeight;
@@ -49,6 +49,9 @@ public class GameView extends View implements Runnable {
 
     //This variable is volatile for when the phone pauses or not
     volatile boolean playing;
+    //Determines the text of the dialog fragment
+    private boolean gameWon = false;
+    private boolean gameFinished = false;
 
     // Used for recharge mechanic
     private long lastChargeTime;
@@ -63,9 +66,6 @@ public class GameView extends View implements Runnable {
 
     //Static images
     private Bitmap background;
-
-    private Bitmap escaped;
-    private Bitmap captured;
 
     //Game Objects
     private Player player;
@@ -83,10 +83,6 @@ public class GameView extends View implements Runnable {
     private Canvas darkness;
     private Bitmap darknessBitmap;
 
-    //Determines the text of the dialog fragment
-    private boolean gameWon = false;
-    private boolean gameFinished = false;
-
     Context context;
 
     public GameView(Context context, AttributeSet attrs) {
@@ -94,75 +90,51 @@ public class GameView extends View implements Runnable {
         this.context = context;
     }
 
-    public void initialize(GameActivity g, int screenX, int screenY) {
-        this.gameActivity = g;
-        sensorMgr = (SensorManager) context.getSystemService(SENSOR_SERVICE);
-        Sensor accelerometer = sensorMgr.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        sensorMgr.registerListener(sensorEventListener, accelerometer, SensorManager.SENSOR_DELAY_UI);
+public void initialize(GameActivity g, Levels gameObjects) {
+    this.gameActivity = g;
+    sensorMgr = (SensorManager) context.getSystemService(SENSOR_SERVICE);
+    Sensor accelerometer = sensorMgr.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+    sensorMgr.registerListener(sensorEventListener, accelerometer, SensorManager.SENSOR_DELAY_UI);
 
-        tileWidth = screenX / NUM_COLUMNS;
-        tileHeight = screenY / NUM_ROWS;
-        screenMinX = tileWidth * 2;
-        screenMinY = 0;
-        screenMaxX = screenX;
-        screenMaxY = screenY;
-        paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        paint.setColor(Color.BLACK);
+    tileWidth = gameObjects.getTileWidth();
+    tileHeight = gameObjects.getTileHeight();
+    screenMinX = gameObjects.getScreenMinX();
+    screenMinY = gameObjects.getScreenMinY();
+    screenMaxX = gameObjects.getScreenMaxX();
+    screenMaxY = gameObjects.getScreenMaxY();
 
-        //Setup lighting
-        darknessBitmap = Bitmap.createBitmap(screenX, screenY, Bitmap.Config.ARGB_8888);
-        darkness = new Canvas(darknessBitmap);
-        transparentPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        transparentPaint.setColor(Color.TRANSPARENT);
-        transparentPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
+    paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    paint.setColor(Color.BLACK);
 
-        blurredLightsPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        blurredLightsPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_OUT));
-        blurredLightsPaint.setColor(Color.TRANSPARENT);
-        blurredLightsPaint.setMaskFilter(new BlurMaskFilter(50, BlurMaskFilter.Blur.NORMAL));
+    //Setup lighting
+    darknessBitmap = Bitmap.createBitmap(screenMaxX, screenMaxY, Bitmap.Config.ARGB_8888);
+    darkness = new Canvas(darknessBitmap);
+    transparentPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    transparentPaint.setColor(Color.TRANSPARENT);
+    transparentPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
 
-        hitBoxPaint = new Paint();
-        hitBoxPaint.setStyle(Paint.Style.STROKE);
-        hitBoxPaint.setColor(Color.GREEN);
+    blurredLightsPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    blurredLightsPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_OUT));
+    blurredLightsPaint.setColor(Color.TRANSPARENT);
+    blurredLightsPaint.setMaskFilter(new BlurMaskFilter(50, BlurMaskFilter.Blur.NORMAL));
 
-        //Create our background and decorations
-        Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.background_full);
-        background = Bitmap.createScaledBitmap(temp, screenX, screenY, true);
-        temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.battery_full);
-        //End Game drawables
-        temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.escaped);
-        escaped = Bitmap.createScaledBitmap(temp, screenX - tileWidth * 3, screenY - tileHeight * 3, true);
-        temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.captured);
-        captured = Bitmap.createScaledBitmap(temp, screenX - tileWidth * 3, screenY - tileHeight *3, true);
+    hitBoxPaint = new Paint();
+    hitBoxPaint.setStyle(Paint.Style.STROKE);
+    hitBoxPaint.setColor(Color.GREEN);
 
-        //Create player
-        //Context, startX, startY, screenX min, screenY min, screenX max, screenY max, width of player, width of height
-        player = new Player(context, tileWidth * 18, tileHeight * 6, screenMinX, screenMinY, screenMaxX, screenMaxY, tileWidth * 2, tileHeight * 2);
-        player.setDirection(-1, 0);
-        //Create our interactables
-        door = new Interactables.Door(context, 0, tileHeight, tileWidth * 2, tileHeight * 2);
-        key = new Interactables.Key(context, (int)(tileWidth * 2.5), tileHeight * 10, tileWidth, tileHeight);
-        //Create our obstacles
-        obstacleList.add(new Obstacles.Table(context, tileWidth * 2, tileHeight *  4, 7, 7));
-        obstacleList.add(new Obstacles.LoungeChair(context, tileWidth * 16, tileHeight * 8, 4, 4));
-        obstacleList.add(new Obstacles.Box(context, tileWidth * 3, 0, 3, 2));
-        obstacleList.add(new Obstacles.Fireplace(context, tileWidth *15, 0, 6, 5));
+    background = gameObjects.getBackground();
+    player = gameObjects.getPlayer();
+    door = gameObjects.getDoor();
+    key = gameObjects.getKey();
+    obstacleList = gameObjects.getObstacleList();
+    enemyList = gameObjects.getEnemyList();
+    lightList = gameObjects.getLightList();
 
-        //Create our enemies
-        enemyList.add(new Enemies.Ghost(context, tileWidth * 12, tileHeight * 2, 3, 3));
-
-        //Create our lights
-        lightList.add(player.getSelfLight());
-        for(Obstacles o : obstacleList) {
-            if(o.hasLight())
-                lightList.add(o.getLight());
-        }
-
-        // Set battery recharge time
-        lastChargeTime = System.currentTimeMillis();
-        lastSpeedTime = lastChargeTime;
-        timeSet = false;
-    }
+    // Set battery recharge time
+    lastChargeTime = System.currentTimeMillis();
+    lastSpeedTime = lastChargeTime;
+    timeSet = false;
+}
 
     @Override
     public void run() {
@@ -172,7 +144,11 @@ public class GameView extends View implements Runnable {
             postInvalidate();
             controlFrameRate();
         }
-        //TODO: if using dialog to end game handle here
+        //Handle end game
+        if(gameFinished) {
+            DialogFragment newFragment = EndGameFragment.newInstance(gameWon, gameActivity.unlockStage(gameWon));
+            newFragment.show(gameActivity.fm, "reset");
+        }
     }
 
     public void update() {
@@ -190,8 +166,9 @@ public class GameView extends View implements Runnable {
         //If collision detected, reset coords
         for(Obstacles o : obstacleList) {
             Rect box = o.getImageBox();
-            o.setIlluminated(f.detectCollision(box));
-            if(!o.isIlluminated() || !o.hasLight()) {
+            //Illuminate obstacle if collides with flashlight || light attached to it
+            o.setIlluminated(f.detectCollision(box) || o.hasLight());
+            if(!o.isIlluminated()) {
                 for (Lights l : lightList) {
                     if (l.detectCollision(box)) {
                         o.setIlluminated(true);
@@ -210,7 +187,10 @@ public class GameView extends View implements Runnable {
 
     private void enemyCollision(Lights.Flashlight f) {
         for(Enemies e : enemyList) {
-            e.update();
+            if(e.isZombie)
+                ((Enemies.Zombie) e).update(player.getCenterX(), player.getCenterY());
+            else
+                e.update();
             Rect box = e.getImageBox();
             e.setIlluminated(f.detectCollision(box));
             if(!e.isIlluminated()) {
@@ -221,7 +201,24 @@ public class GameView extends View implements Runnable {
                     }
                 }
             }
+            if(e.isZombie) {
+                int newX = ((Enemies.Zombie) e).newX;
+                int newY = ((Enemies.Zombie) e).newY;
+                int oldX = e.getCenterX();
+                int oldY = e.getCenterY();
+                for (Obstacles o : obstacleList) {
+                    if(o.detectCollision(newX, oldY)) {
+                        newX = oldX;
+                    }
+                    if(o.detectCollision(oldX, newY)) {
+                        newY = oldY;
+                    }
+                }
+                ((Enemies.Zombie) e).setLocation(newX, newY);
+            }
+
             if(e.detectCollision(player.getHitBox())) {
+            //if(e.detectCollision(player.getCenterX(), player.getCenterY())) {
                 playing = false;
                 gameFinished = true;
                 gameWon = false;
@@ -231,8 +228,16 @@ public class GameView extends View implements Runnable {
     }
 
     private void interactablesCollision(Lights.Flashlight f) {
-        if(key.detectCollision(player.getCenterX(),player.getCenterY()))
+        boolean keyHit = Rect.intersects(key.getHitBox(), player.getHitBox());
+        //if(key.detectCollision(player.getCenterX(),player.getCenterY()) && !player.hasKey()) {
+        if(keyHit && !player.hasKey()) {
+            if(MainActivity.mSoundOn) {
+                MediaPlayer player = MediaPlayer.create(context, R.raw.key_found);
+                player.setVolume(0.5f, 0.5f);
+                player.start();
+            }
             player.foundKey();
+        }
         Rect box = key.getImageBox();
         key.setIlluminated(f.detectCollision(box));
         if(!key.isIlluminated()) {
@@ -254,6 +259,10 @@ public class GameView extends View implements Runnable {
             }
         }
         if(door.detectCollision(player.getCenterX(),player.getCenterY()) && player.hasKey()) {
+            if(MainActivity.mSoundOn) {
+                MediaPlayer player = MediaPlayer.create(context, R.raw.door_opened);
+                player.start();
+            }
             playing = false;
             gameFinished = true;
             gameWon = true;
@@ -263,34 +272,24 @@ public class GameView extends View implements Runnable {
     @Override
     public void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        if(!gameFinished) {
-            //Draw background + shadowmap
-            canvas.drawBitmap(background, 0, 0, paint);
-            drawInteractables(canvas);
-            drawObstacles(canvas);
-            //Draw player below lights (for now)
-            //Drawing underneath lights disguises some lag of the flashlight
-            drawPlayer(canvas);
-            drawEnemies(canvas);
-            drawLights(canvas);
-            drawHUD(canvas);
-        }
-        //Handle endgame (to be removed and replaced with dialog fragment)
-        else {
-            if (gameWon)
-                canvas.drawBitmap(escaped, (int) (tileWidth * 1.5), (int) (tileHeight * 1.5), paint);
-            else
-                canvas.drawBitmap(captured, (int) (tileWidth * 1.5), (int) (tileHeight * 1.5), paint);
-        }
+        //Draw background + shadowmap
+        canvas.drawBitmap(background, 0, 0, paint);
+
+        drawInteractables(canvas);
+        drawObstacles(canvas);
+        drawPlayer(canvas);
+        drawEnemies(canvas);
+        drawLights(canvas);
+        drawHUD(canvas);
     }
 
     private void drawInteractables(Canvas canvas) {
-        if(!player.hasKey() && (key.isIlluminated())) {
+        if((!player.hasKey() && key.isIlluminated()) || (MainActivity.mDebugModeOn && !player.hasKey())) {
             key.drawInteractable(canvas, paint);
-            if(MainActivity.mDebugModeOn)
+            if(MainActivity.mDebugModeOn && !player.hasKey())
                 key.drawHitBox(canvas, hitBoxPaint);
         }
-        if(door.isIlluminated())
+        if(door.isIlluminated() || MainActivity.mDebugModeOn)
             door.drawInteractable(canvas, paint);
         if(MainActivity.mDebugModeOn) {
             door.drawHitBox(canvas, hitBoxPaint);
@@ -300,7 +299,7 @@ public class GameView extends View implements Runnable {
 
     private void drawObstacles(Canvas canvas) {
         for (Obstacles o : obstacleList) {
-            if(o.illuminated)
+            if(o.illuminated || MainActivity.mDebugModeOn)
                 o.drawObstacle(canvas, paint);
             if(MainActivity.mDebugModeOn)
                 o.drawHitBox(canvas, hitBoxPaint);
@@ -318,7 +317,7 @@ public class GameView extends View implements Runnable {
 
     private void drawEnemies(Canvas canvas) {
         for(Enemies e : enemyList) {
-            if(e.illuminated) {
+            if(e.illuminated || MainActivity.mDebugModeOn) {
                 canvas.save();
                 canvas.rotate((float) e.getAngleDegrees(), e.getCenterX(), e.getCenterY());
                 e.drawEnemy(canvas, paint);
@@ -364,10 +363,7 @@ public class GameView extends View implements Runnable {
         }
     }
 
-    //This supposedly makes the game run at a steady 60fps
-    //TODO: modify the length of sleep to maintain steady fps
-    //We can shoot for 30fps instead
-    //Need to optimize, 30fps is getting harder to achieve
+    //This attempts to makes the game run at a steady 30fps
     private void controlFrameRate() {
         try {
             gameThread.sleep(33);
@@ -396,6 +392,9 @@ public class GameView extends View implements Runnable {
         sensorMgr.registerListener(sensorEventListener, accelerometer, SensorManager.SENSOR_DELAY_UI);
         gameThread = new Thread(this);
         gameThread.start();
+        if(MainActivity.mDebugModeOn) {
+            player.updateCharge(1);
+        }
     }
 
     private SensorEventListener sensorEventListener =
@@ -420,7 +419,6 @@ public class GameView extends View implements Runnable {
                             else if (curTime - lastChargeTime > 500) {
                                 player.updateCharge(0.20f);
                                 timeSet = false;
-                                Log.d("In GameView:", "RECHARGE!!!!!");
                             }
                         }
 
@@ -435,7 +433,6 @@ public class GameView extends View implements Runnable {
                 }
             };
 
-
     @Override
     public boolean onTouchEvent(MotionEvent motionEvent) {
         switch(motionEvent.getAction() & MotionEvent.ACTION_MASK) {
@@ -446,27 +443,42 @@ public class GameView extends View implements Runnable {
             //Screen is touched, face in destination direction
             //If held down, move in that direction as well
             case MotionEvent.ACTION_DOWN:
-                //TODO: If using dialog remove this
-                if (gameFinished) {
-                    if (motionEvent.getX() > screenMaxX - tileWidth * 6 && motionEvent.getX() < screenMaxX - tileWidth) {
-                        if (motionEvent.getY() > screenMaxY - tileHeight * 5 && motionEvent.getY() < screenMaxY - tileHeight) {
-                            gameActivity.finish();
-                        }
-                    }
-                    //if gamelost, do gameActivity.recreate() to reset
-                    //otherwise, get a new intent for next stage, gameActivity.finish(), then startActivity(intent)
-                }
-                else {
-                    player.setDestination((int) motionEvent.getX(), (int) motionEvent.getY());
-                    player.startMoving();
-                }
+                player.setDestination((int) motionEvent.getX(), (int) motionEvent.getY());
+                player.startMoving();
                 break;
             //Screen is being pressed & moved, player should move
             case MotionEvent.ACTION_MOVE:
                 player.setDestination((int)motionEvent.getX(), (int)motionEvent.getY());
+                double distance = GameActivity.calculateDistance(player.getCenterX(), player.getCenterY(), (int)motionEvent.getX(), (int)motionEvent.getY());
+                if(!player.isMoving() && distance >= 30)
+                    player.startMoving();
                 break;
         }
         return true;
+    }
+
+    public Player getPlayer() {
+        return player;
+    }
+
+    public void setPlayer(Player player) {
+        this.player = player;
+    }
+
+    public List<Enemies> getEnemyList() {
+        return enemyList;
+    }
+
+    public void setEnemyList(List<Enemies> enemyList) {
+        this.enemyList = enemyList;
+    }
+
+    public boolean hasWon() {
+        return gameWon;
+    }
+
+    public boolean hasFinished() {
+        return gameFinished;
     }
 
 }

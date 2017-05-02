@@ -6,13 +6,15 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.Log;
 
 /**
  * Created by Kevin on 4/1/2017.
  */
 
-public class Enemies {
+public class Enemies implements Parcelable {
     //Image
     protected Bitmap image;
     protected int imageWidth;
@@ -41,15 +43,17 @@ public class Enemies {
 
     protected boolean illuminated = false;
 
+    public boolean isZombie = false;
+
     public Enemies(Context context, int x, int y) {
         this.x = x;
         this.y = y;
         direction = new double[]{0, -1};
     }
 
-//    public boolean detectCollision(int playerX, int playerY) {
-//        return playerX >= hitBox.left && playerX <= hitBox.right && playerY >= hitBox.top && playerY <= hitBox.bottom;
-//    }
+    public boolean detectCollision(int playerX, int playerY) {
+        return playerX >= hitBox.left && playerX <= hitBox.right && playerY >= hitBox.top && playerY <= hitBox.bottom;
+    }
 
     public boolean detectCollision(Rect playerHitBox) {
         return Rect.intersects(playerHitBox, this.hitBox);
@@ -130,35 +134,241 @@ public class Enemies {
         return imageBox;
     }
 
+    public double[] getDirection() {
+        return direction;
+    }
+
+    public int describeContents() {
+        return 0;
+    }
+
+    public void writeToParcel(Parcel out, int flags) {
+        out.writeDouble(direction[0]);
+        out.writeDouble(direction[1]);
+        out.writeInt(x);
+        out.writeInt(y);
+    }
+
+    public static final Parcelable.Creator<Enemies> CREATOR
+            = new Parcelable.Creator<Enemies>() {
+        public Enemies createFromParcel(Parcel in) {
+            return new Enemies(in);
+        }
+
+        public Enemies[] newArray(int size) {
+            return new Enemies[size];
+        }
+    };
+
+    private Enemies(Parcel in) {
+        double x1 = in.readDouble();
+        double x2 = in.readDouble();
+        direction = new double[]{x1, x2};
+        x = in.readInt();
+        y = in.readInt();
+
+    }
+
     public static class Ghost extends Enemies {
-        public Ghost (Context context, int x, int y, int scaleX, int scaleY) {
+        private Rect verticalHitBox;
+        private Rect horizontalHitBox;
+        private boolean movingHorizontally;
+
+        double orbitX;
+        double orbitY;
+        double orbitRadius;
+
+        double time;
+
+        public Ghost (Context context, int x, int y, int scaleX, int scaleY, double xVector, double yVector, double radius) {
             super(context, x, y);
             Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.transparent_ghost);
-            image = Bitmap.createScaledBitmap(temp, GameView.tileWidth * scaleX, GameView.tileHeight * scaleY, true);
+            image = Bitmap.createScaledBitmap(temp, GameActivity.tileWidth * scaleX, GameActivity.tileHeight * scaleY, true);
             this.imageWidth = image.getWidth();
             this.imageHeight = image.getHeight();
             centerX = x + image.getWidth()/2;
             centerY = y + image.getHeight()/2;
-            hitBox = new Rect(x, y, x+imageWidth, y+imageHeight);
+            setRadius(radius);
+            verticalHitBox = new Rect(x + imageWidth / 6, y + imageHeight / 5, x+ 5 * imageWidth / 6, y+ 4 * imageHeight / 5);
+            horizontalHitBox = new Rect(x + imageWidth / 5, y + imageHeight/ 6, x+ 4 * imageWidth / 5, y+ 5 * imageHeight / 6);
             imageBox = new Rect(x, y, x+imageWidth, y+imageWidth);
-            setDirection(-1, 0);
-            patrolRoute = GameView.tileWidth * 7;
+            setHitBox(verticalHitBox);
+            setDirection(xVector, yVector);
             moving = true;
-            speed = 7;
+            speed = (int)(GameActivity.tileWidth / 10f) * (int)xVector;
+            time = 0;
         }
 
+        public void setDirection(double xVector, double yVector) {
+            direction[0] = xVector;
+            direction[1] = yVector;
+            angleDegrees = (float) GameActivity.getAngle(direction[0], direction[1]);
+            if(direction[0] < 0)
+                angleDegrees = -angleDegrees;
+
+            movingHorizontally = Math.abs(direction[0]) > Math.abs(direction[1]);
+            if(movingHorizontally)
+                setHitBox(horizontalHitBox);
+            else
+                setHitBox(verticalHitBox);
+        }
+        public void update() {
+            if(moving) {
+                double radian = speed * time;
+                if (Math.toDegrees(radian) > 359 || Math.toDegrees(radian) < -359) time = 0;
+                time+= 0.005;
+                double locX = orbitX + orbitRadius*Math.cos(radian);
+                double locY = orbitY + orbitRadius*Math.sin(radian);
+                setX((int) locX);
+                setY((int) locY);
+                if(speed > 0)
+                    setAngleDegrees(Math.toDegrees(radian) + 180);
+                else
+                    setAngleDegrees(Math.toDegrees(radian) + 360);
+                hitBox.offsetTo(x + imageWidth / 6, y + imageHeight / 5);
+                imageBox.offsetTo(x, y);
+            }
+        }
+
+
+        public void setAngleDegrees(double degrees) {
+            movingHorizontally = 45 < degrees % 180 && degrees % 180 < 135;
+            angleDegrees = degrees;
+        }
+
+        public void setRadius(double distance) {
+            orbitRadius = distance;
+            orbitX = x - distance;
+            orbitY = y;
+        }
+
+        public void setHitBox(Rect newHitBox) {
+            hitBox = newHitBox;
+        }
+
+    }
+
+    public static class Zombie extends Enemies {
+        private Rect verticalHitBox;
+        private Rect horizontalHitBox;
+        private boolean movingHorizontally;
+        public int newX;
+        public int newY;
+        public Zombie (Context context, int x, int y, int scaleX, int scaleY, double xVector, double yVector) {
+            super(context, x, y);
+            Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.zombie);
+            image = Bitmap.createScaledBitmap(temp, GameActivity.tileWidth * scaleX, GameActivity.tileHeight * scaleY, true);
+            this.imageWidth = image.getWidth();
+            this.imageHeight = image.getHeight();
+            centerX = x + image.getWidth()/2;
+            centerY = y + image.getHeight()/2;
+            verticalHitBox = new Rect(x + imageWidth / 6, y + imageHeight / 5, x+ 5 * imageWidth / 6, y+ 4 * imageHeight / 5);
+            horizontalHitBox = new Rect(x + imageWidth / 5, y + imageHeight/ 6, x+ 4 * imageWidth / 5, y+ 5 * imageHeight / 6);
+            imageBox = new Rect(x, y, x+imageWidth, y+imageWidth);
+            setDirection(xVector, yVector);
+            moving = true;
+            speed = (int)(GameActivity.tileWidth / 20f);
+            isZombie = true;
+        }
+
+        public void setDirection(double xVector, double yVector) {
+            direction[0] = xVector;
+            direction[1] = yVector;
+            angleDegrees = (float) GameActivity.getAngle(direction[0], direction[1]);
+            if(direction[0] < 0)
+                angleDegrees = -angleDegrees;
+
+            movingHorizontally = Math.abs(direction[0]) > Math.abs(direction[1]);
+            if(movingHorizontally)
+                setHitBox(horizontalHitBox);
+            else
+                setHitBox(verticalHitBox);
+        }
+        public void update(int playerX, int playerY) {
+            if(moving) {
+                double distance = GameActivity.calculateDistance(centerX, centerY, playerX, playerY);
+                setDirection((playerX - getCenterX()) / distance, (playerY - getCenterY()) / distance);
+                newX = (int)(centerX + direction[0] * speed);
+                newY = (int)(centerY + direction[1] * speed);
+            }
+        }
+
+        public void setLocation(int newX, int newY) {
+            setX(newX - imageWidth / 2);
+            setY(newY - imageHeight / 2);
+            if(movingHorizontally)
+                hitBox.offsetTo(x + imageWidth / 5, y + imageHeight / 6);
+            else
+                hitBox.offsetTo(x + imageWidth / 6, y + imageHeight / 5);
+            imageBox.offsetTo(x, y);
+        }
+        public void setPath(int distance) {
+            patrolRoute = distance;
+        }
+
+        public void setHitBox(Rect newHitBox) {
+            hitBox = newHitBox;
+        }
+
+
+    }
+
+    public static class Mummy extends Enemies {
+        private Rect verticalHitBox;
+        private Rect horizontalHitBox;
+        private boolean movingHorizontally;
+        public Mummy (Context context, int x, int y, int scaleX, int scaleY, double xVector, double yVector) {
+            super(context, x, y);
+            Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.mummy);
+            image = Bitmap.createScaledBitmap(temp, GameActivity.tileWidth * scaleX, GameActivity.tileHeight * scaleY, true);
+            this.imageWidth = image.getWidth();
+            this.imageHeight = image.getHeight();
+            centerX = x + image.getWidth()/2;
+            centerY = y + image.getHeight()/2;
+            verticalHitBox = new Rect(x + imageWidth / 6, y + imageHeight / 5, x+ 5 * imageWidth / 6, y+ 4 * imageHeight / 5);
+            horizontalHitBox = new Rect(x + imageWidth / 5, y + imageHeight/ 6, x+ 4 * imageWidth / 5, y+ 5 * imageHeight / 6);
+            imageBox = new Rect(x, y, x+imageWidth, y+imageWidth);
+            setDirection(xVector, yVector);
+            moving = true;
+            speed = (int)(GameActivity.tileWidth / 10f);
+        }
+
+        public void setDirection(double xVector, double yVector) {
+            direction[0] = xVector;
+            direction[1] = yVector;
+            angleDegrees = (float) GameActivity.getAngle(direction[0], direction[1]);
+            if(direction[0] < 0)
+                angleDegrees = -angleDegrees;
+
+            movingHorizontally = Math.abs(direction[0]) > Math.abs(direction[1]);
+            if(movingHorizontally)
+                setHitBox(horizontalHitBox);
+            else
+                setHitBox(verticalHitBox);
+        }
         public void update() {
             if(moving) {
                 setX((int)(x + direction[0] * speed));
-                //setY(directionY * speed);
-                hitBox.offsetTo(x, y);
+                setY((int)(y + direction[1] * speed));
+                if(movingHorizontally)
+                    hitBox.offsetTo(x + imageWidth / 5, y + imageHeight / 6);
+                else
+                    hitBox.offsetTo(x + imageWidth / 6, y + imageHeight / 5);
                 imageBox.offsetTo(x, y);
-                distanceTraveled += Math.abs(direction[0] * speed);
+                distanceTraveled += Math.abs((int)(direction[0] * speed)) + Math.abs((int)(direction[1] * speed));
                 if(distanceTraveled >= patrolRoute) {
-                    setDirection(-direction[0], direction[1]);
+                    setDirection(-direction[0], -direction[1]);
                     distanceTraveled = 0;
                 }
             }
+        }
+
+        public void setPath(int distance) {
+            patrolRoute = distance;
+        }
+
+        public void setHitBox(Rect newHitBox) {
+            hitBox = newHitBox;
         }
 
     }

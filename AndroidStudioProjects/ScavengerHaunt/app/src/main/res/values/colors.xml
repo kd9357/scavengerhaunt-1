@@ -6,4 +6,5 @@
     <color name="colorText">#FFFFFF</color>
     <color name="colorSecondaryText">#d6d6d6</color>
     <color name="colorBackground">#000000</color>
+    <color name="limeGreen">#00ff00</color>
 </resources>

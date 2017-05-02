@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:background="@color/colorBackground">
     <CheckBoxPreference
         android:key="sound"
         android:title="@string/sound_title"
@@ -10,10 +11,10 @@
         android:title="@string/shadow_title"
         android:defaultValue="true"
         android:summary="@string/shadow_summary"/>
-    <CheckBoxPreference
-        android:key="debug"
-        android:title="@string/debug_title"
-        android:defaultValue="false"
-        android:summary="@string/debug_summary"/>
+    <!--<CheckBoxPreference-->
+        <!--android:key="debug"-->
+        <!--android:title="@string/debug_title"-->
+        <!--android:defaultValue="false"-->
+        <!--android:summary="@string/debug_summary"/>-->
 
 </PreferenceScreen>

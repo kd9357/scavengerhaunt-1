@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.util.Log;
 
 /**
  * Created by Kevin on 3/23/2017.
@@ -72,12 +73,21 @@ public class Interactables {
 
     public static class Door extends Interactables {
 
-        public Door(Context context, int x, int y, int tileWidth, int tileHeight) {
+        public Door(Context context, int x, int y, int tileWidth, int tileHeight, boolean vertical) {
             super(context, x, y);
-            Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.door);
-            image = Bitmap.createScaledBitmap(temp, tileWidth, tileHeight * 2, true);
-            imageBox = new Rect(x, y, x+image.getWidth(), y+image.getHeight());
-            hitBox = new Rect(x + 2 * image.getWidth() / 3, y + image.getHeight()/3, x  + (int)(1.5 * image.getWidth()), y + image.getHeight());
+            Bitmap temp;
+            if(vertical) {
+                temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.door_2);
+                image = Bitmap.createScaledBitmap(temp, (int)(tileWidth * 1.2), tileHeight, true);
+                imageBox = new Rect(x, y, x+image.getWidth(), y+image.getHeight());
+                hitBox = new Rect(x, y + image.getHeight(), x  + image.getWidth(), y + (int)(image.getHeight() * 1.6));
+            }
+            else {
+                temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.door);
+                image = Bitmap.createScaledBitmap(temp, tileWidth, tileHeight * 2, true);
+                imageBox = new Rect(x, y, x+image.getWidth(), y+image.getHeight());
+                hitBox = new Rect(x + 2 * image.getWidth() / 3, y + image.getHeight()/3, x  + (int)(1.5 * image.getWidth()), y + image.getHeight());
+            }
         }
 
     }

@@ -4,9 +4,13 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 
 /**
@@ -19,6 +23,7 @@ public class StageView extends View {
     private Bitmap mLockedStage;
     private Bitmap mUnlockedStage;
     private Paint mPaint;
+    private Paint temp;
 
     //0: locked, 1 unlocked
     private int[] mStages;
@@ -37,14 +42,12 @@ public class StageView extends View {
         mUnlockedStage = BitmapFactory.decodeResource(getResources(), R.drawable.stage_icon_placeholder);
 
         mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-    }
-
-    public int getStageWidth() {
-        return getWidth();
-    }
-
-    public int getStageHeight() {
-        return getHeight();
+        temp = new Paint(Paint.ANTI_ALIAS_FLAG);
+        temp.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC));
+        temp.setColor(getResources().getColor(R.color.colorText));
+        temp.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_ATOP));
+        temp.setTextSize(200);
+        temp.setStrokeWidth(100);
     }
 
     @Override
@@ -53,8 +56,6 @@ public class StageView extends View {
         int buttonSize = getWidth() / 5;
         Rect drawingRect = new Rect();
         //Draw on button locations
-        //TODO: Actually calculate button locations
-        //As it stands now the buttons are not in the right position/scale
         int r = 0;
         int c = 0;
         for(int i = 0; i < mStages.length; i++) {
@@ -70,9 +71,15 @@ public class StageView extends View {
             else {
                 //Should also draw i + 1 over the unlocked stage bitmap
                 canvas.drawBitmap(mUnlockedStage, null, drawingRect, mPaint);
+                int leftOffset = c + buttonSize / 3;
+                int upOffset = r + 2 * buttonSize / 3;
+                if(i + 1 > 9) {
+                    leftOffset = c + buttonSize / 6;
+                }
+                canvas.drawText("" + (i + 1), leftOffset, upOffset, temp);
             }
             c += buttonSize;
-            if(c > getWidth()) {
+            if(c + buttonSize > getWidth()) {
                 c = 0;
                 r += buttonSize;
                 //Unlikely to happen, but possibly add pagination for more stages

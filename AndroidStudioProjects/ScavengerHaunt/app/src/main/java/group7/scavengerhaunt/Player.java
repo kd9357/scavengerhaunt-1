@@ -41,13 +41,11 @@ public class Player {
     private double distance;
     //The normalized direction the player should be heading to
     private double[] direction;
-//    private double directionX;
-//    private double directionY;
     //Player's heading in relation with North
     private double angleDegrees = 0;
 
     //Movement speed
-    private int speed = 10;
+    private float speed;
     private boolean moving = false;
 
     //Attached Lights
@@ -61,59 +59,65 @@ public class Player {
     private int sweepingAngle;
 
     Interactables.Battery battery;
-    private long lastTime;
+    private long lastTime;  //For battery
+    private long movementTime;  //For movement
     private float charge;
-    //Has key?
+
     private boolean hasKey = false;
 
     //Context, startX, startY, screenX min, screenY min, screenX max, screenY max, width of player, width of height
     public Player(Context context, int startX, int startY, int minX, int minY, int screenX, int screenY, int tileWidth, int tileHeight) {
-        //For the wall
+        //For the walls
         screenMinX = minX;
         screenMinY = minY;
-        //Set current orientation to point northwards as default
         Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.avatar);
         image = Bitmap.createScaledBitmap(temp, tileWidth, tileHeight, true);
         this.imageWidth = image.getWidth();
         this.imageHeight = image.getHeight();
-        //Set position
+        //Set current orientation to point northwards as default
         direction = new double[]{0, -1};
+        //Set location
         updateX(startX);
         updateY(startY);
-        hitBox = new Rect(x, y, x + imageWidth, y + imageHeight);
+        hitBox = new Rect(x + imageWidth / 5, y + imageWidth / 5, x + 4 * imageWidth / 5, y + 4 * imageHeight / 5);
         screenMaxX = screenX - imageWidth;
         screenMaxY = screenY - imageHeight;
         //Create flashlight
         flashLightRadius = tileWidth * 3;
-        selfLightRadius = 3 * imageWidth / 5;
+        selfLightRadius = 55 * imageWidth / 100;
         startingAngle = 243;
         sweepingAngle = 54;
-        flashLightXOffset = imageWidth/8;
-        flashLightYOffset = imageHeight/8;
+        flashLightXOffset = 22 * imageWidth / 100;
+        flashLightYOffset = imageHeight/9;
         flashlight = new Lights.Flashlight(x + flashLightXOffset, y + flashLightYOffset, flashLightRadius, startingAngle, sweepingAngle, getDirection());
         selflight = new Lights(centerX, centerY, selfLightRadius);
         charge = 1.0f;
-        battery = new Interactables.Battery(context, charge, GameView.tileWidth /3, 0, GameView.tileWidth, GameView.tileHeight);
+        battery = new Interactables.Battery(context, charge, GameActivity.tileWidth /3, 0, GameActivity.tileWidth, GameActivity.tileHeight);
         lastTime = System.currentTimeMillis();
+        movementTime = System.currentTimeMillis();
+        speed = GameActivity.tileWidth / 10f;
     }
 
     //Controls player location & flashlight radius
     public int[] update() {
         int[] coords = {this.centerX, this.centerY};
+        float deltaTime = (System.currentTimeMillis() - movementTime);
+        deltaTime /= 33.3f;
+        movementTime = System.currentTimeMillis();
         if(moving) {
             //Set orientation
             angleDegrees = (float) GameActivity.getAngle(direction[0], direction[1]);
             if(direction[0] < 0)
                 angleDegrees = -angleDegrees;
-            coords[0] += direction[0] * speed;
-            coords[1] += direction[1] * speed;
+            coords[0] += direction[0] * GameActivity.tileWidth / 10f * deltaTime;
+            coords[1] += direction[1] * GameActivity.tileWidth / 10f * deltaTime;
         }
-        //TODO: if doing battery, update radius of flashlight here
-        if(charge > 0.05f && System.currentTimeMillis() - lastTime > 500) {
+        if (charge > 0.05f && System.currentTimeMillis() - lastTime > 500) {
             lastTime = System.currentTimeMillis();
-            charge -= 0.01f;
+            if(!MainActivity.mDebugModeOn)
+                charge -= 0.01f;
             battery.setPercentage(charge);
-            flashLightRadius = (int)(charge * flashlight.getMaxRadius());
+            flashLightRadius = (int) (charge * flashlight.getMaxRadius());
             flashlight.setRadius(flashLightRadius);
         }
         return coords;
@@ -125,8 +129,8 @@ public class Player {
         updateY(newY - imageHeight/2);
 
         distance = GameActivity.calculateDistance(centerX, centerY, destinationX, destinationY);
-        //Reached goal
-        if(distance <= 20)
+        //Reached goal with some buffer
+        if(distance <= 50)
                 stopMoving();
 
         //Ensure player does not leave screen
@@ -139,7 +143,7 @@ public class Player {
         else if(centerY < screenMinY)
             updateY(screenMinY - imageHeight/2);
 
-        hitBox.offsetTo(x, y);
+        hitBox.offsetTo(x + imageWidth / 4, y + imageHeight / 4);
         flashlight.setCircle(x + flashLightXOffset, y + flashLightYOffset, flashLightRadius);
         flashlight.setDirection(getDirection());
         selflight.setCircle(centerX, centerY, selfLightRadius);
@@ -174,9 +178,20 @@ public class Player {
         centerY = y + imageHeight/2;
     }
 
+    public void newLocation(int x, int y) {
+        updateX(x);
+        updateY(y);
+        hitBox.offsetTo(x + imageWidth / 4, y + imageHeight / 4);
+        flashlight.setCircle(x + flashLightXOffset, y + flashLightYOffset, flashLightRadius);
+        flashlight.setDirection(getDirection());
+        selflight.setCircle(centerX, centerY, selfLightRadius);
+    }
+
     public void startMoving() { moving = true; }
 
     public void stopMoving() { moving = false; }
+
+    public boolean isMoving() { return moving; }
 
     public void foundKey() {
         hasKey = true;
@@ -222,6 +237,7 @@ public class Player {
     }
 
     public float getCharge() { return charge; }
+
     public void updateCharge(float change) {
         stopMoving();
         if (charge + change > 1.0f) {
@@ -230,6 +246,9 @@ public class Player {
         else charge += change;
     }
 
+    public void setCharge(float charge) {
+        this.charge = charge;
+    }
     public boolean hasKey() {
         return hasKey;
     }
