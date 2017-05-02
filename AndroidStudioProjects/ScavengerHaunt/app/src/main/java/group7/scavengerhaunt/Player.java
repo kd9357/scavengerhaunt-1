@@ -129,8 +129,8 @@ public class Player {
         updateY(newY - imageHeight/2);
 
         distance = GameActivity.calculateDistance(centerX, centerY, destinationX, destinationY);
-        //Reached goal
-        if(distance <= 20)
+        //Reached goal with some buffer
+        if(distance <= 50)
                 stopMoving();
 
         //Ensure player does not leave screen
@@ -190,6 +190,8 @@ public class Player {
     public void startMoving() { moving = true; }
 
     public void stopMoving() { moving = false; }
+
+    public boolean isMoving() { return moving; }
 
     public void foundKey() {
         hasKey = true;

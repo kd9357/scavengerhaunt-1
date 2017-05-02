@@ -11,10 +11,10 @@
         android:title="@string/shadow_title"
         android:defaultValue="true"
         android:summary="@string/shadow_summary"/>
-    <CheckBoxPreference
-        android:key="debug"
-        android:title="@string/debug_title"
-        android:defaultValue="false"
-        android:summary="@string/debug_summary"/>
+    <!--<CheckBoxPreference-->
+        <!--android:key="debug"-->
+        <!--android:title="@string/debug_title"-->
+        <!--android:defaultValue="false"-->
+        <!--android:summary="@string/debug_summary"/>-->
 
 </PreferenceScreen>

@@ -449,6 +449,9 @@ public void initialize(GameActivity g, Levels gameObjects) {
             //Screen is being pressed & moved, player should move
             case MotionEvent.ACTION_MOVE:
                 player.setDestination((int)motionEvent.getX(), (int)motionEvent.getY());
+                double distance = GameActivity.calculateDistance(player.getCenterX(), player.getCenterY(), (int)motionEvent.getX(), (int)motionEvent.getY());
+                if(!player.isMoving() && distance >= 30)
+                    player.startMoving();
                 break;
         }
         return true;
